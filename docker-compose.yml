@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgis/postgis:15-3.3
+    container_name: sentinel-database
+    environment:
+      POSTGRES_DB: mplads_db
+      POSTGRES_USER: sentinel_user
+      POSTGRES_PASSWORD: sentinel_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel_user -d mplads_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ml-service:
+    build: ./ml-service
+    container_name: sentinel-ml-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: sentinel-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/mplads_db
+      - SPRING_DATASOURCE_USERNAME=sentinel_user
+      - SPRING_DATASOURCE_PASSWORD=sentinel_password
+      - SENTINEL_ML_SERVICE_URL=http://ml-service:8082
+    depends_on:
+      database:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: sentinel-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  pgdata:
