@@ -9,6 +9,8 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import InvestigationPage from './pages/InvestigationPage';
 import ReportPage from './pages/ReportPage';
 import DataImportPage from './pages/DataImportPage';
+import LandingPage from './pages/LandingPage';
+import RankingsPage from './pages/RankingsPage';
 import { authService } from './services/auth';
 
 function ProtectedLayout({ children }) {
@@ -90,8 +92,17 @@ export default function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/rankings"
+          element={
+            <ProtectedLayout>
+              <RankingsPage />
+            </ProtectedLayout>
+          }
+        />
+
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

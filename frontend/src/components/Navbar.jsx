@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, LogOut, Shield } from 'lucide-react';
+import { ShieldCheck, LogOut, Shield, Flame } from 'lucide-react';
 import { authService } from '../services/auth';
 
 export default function Navbar() {
@@ -71,14 +71,39 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Read-Only Authenticated Jurisdiction (Cannot change role post-login) */}
-        <div className="hidden md:flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/80 text-xs">
+        {/* Top Navigation Links */}
+        <div className="hidden md:flex items-center gap-1.5 text-xs">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors font-medium cursor-pointer"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => navigate('/rankings')}
+            className="px-3 py-1.5 rounded-lg bg-red-950/50 text-red-300 hover:text-white hover:bg-red-900/60 border border-red-800/50 transition-colors font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Flame className="w-3.5 h-3.5 text-red-400" />
+            <span>Critical Risk Rankings</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 bg-red-600 text-white rounded-full font-bold">TOP</span>
+          </button>
+          <button
+            onClick={() => navigate('/projects')}
+            className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors font-medium cursor-pointer"
+          >
+            Project Registry
+          </button>
+        </div>
+
+        {/* Read-Only Authenticated Jurisdiction */}
+        <div className="hidden xl:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs">
           <Shield className="w-3.5 h-3.5 text-amber-400" />
           <span className="text-slate-400 text-[11px]">Jurisdiction:</span>
           <span className="font-semibold text-slate-200 font-mono text-[11px]">
             {user.jurisdiction || user.district || 'National Central Oversight'}
           </span>
         </div>
+
 
         <div className="flex items-center gap-4 text-xs">
           <div className="hidden lg:flex flex-col text-right">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, FileText, Lock, ShieldAlert, UploadCloud, Globe, Building } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, ChevronLeft, ChevronRight, FileText, Lock, ShieldAlert, UploadCloud, Globe, Building, Filter } from 'lucide-react';
 import { api } from '../services/api';
 import { authService } from '../services/auth';
 import RiskBadge from '../components/RiskBadge';
@@ -8,7 +8,8 @@ import StatusBadge from '../components/StatusBadge';
 
 export default function ProjectListPage() {
   const navigate = useNavigate();
-  const user = authService.getUser();
+  const [searchParams] = useSearchParams();
+  const user = authService.getUser() || { roleId: 'MINISTRY', jurisdiction: 'National Central Oversight' };
   
   const isMP = user.roleId === 'MP';
   const isState = user.roleId === 'STATE';
@@ -25,13 +26,53 @@ export default function ProjectListPage() {
   const [loading, setLoading] = useState(true);
   const [availableDistricts, setAvailableDistricts] = useState([]);
 
-  const [query, setQuery] = useState('');
-  const [district, setDistrict] = useState(isLockedDistrict ? lockedDistrictValue : '');
-  const [projectType, setProjectType] = useState('');
+  // Initialize from searchParams if navigated from Dashboard or elsewhere
+  const initialDistrict = searchParams.get('district') || (isLockedDistrict ? lockedDistrictValue : '');
+  const initialSector = searchParams.get('projectType') || '';
+  const initialRiskLevel = searchParams.get('riskLevel') || '';
+  const initialQuery = searchParams.get('query') || '';
+
+  const [query, setQuery] = useState(initialQuery);
+  const [district, setDistrict] = useState(initialDistrict);
+  const [projectType, setProjectType] = useState(initialSector);
   const [status, setStatus] = useState('');
-  const [riskLevel, setRiskLevel] = useState('');
+  const [riskLevel, setRiskLevel] = useState(initialRiskLevel);
   const [sortBy, setSortBy] = useState('riskScore');
   const [sortDirection, setSortDirection] = useState('desc');
+
+  const renderRiskFlags = (p) => {
+    const flags = [];
+    const pGap = p.progressGap || (p.expectedProgressPercentage && p.progressPercentage ? Math.max(0, p.expectedProgressPercentage - p.progressPercentage) : 0);
+    
+    if (pGap > 15) {
+      flags.push({ label: `Lag ${pGap.toFixed(0)}%`, color: 'bg-red-50 text-red-700 border-red-200' });
+    }
+    if (p.delayDays > 30) {
+      flags.push({ label: `${p.delayDays}d Delayed`, color: 'bg-amber-50 text-amber-800 border-amber-200' });
+    }
+    if ((p.expenditureAmount && p.sanctionedAmount && p.expenditureAmount > p.sanctionedAmount) || (p.fundUtilizationPercent && p.fundUtilizationPercent > 100)) {
+      flags.push({ label: 'Cost Overrun', color: 'bg-rose-50 text-rose-800 border-rose-200' });
+    }
+    if (p.riskScore >= 80) {
+      flags.push({ label: 'Proximity Overlap', color: 'bg-purple-50 text-purple-700 border-purple-200' });
+    }
+    if (p.riskScore >= 60 && flags.length === 0) {
+      flags.push({ label: 'Milestone Discrepancy', color: 'bg-orange-50 text-orange-700 border-orange-200' });
+    }
+    if (flags.length === 0) {
+      flags.push({ label: 'Compliant', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' });
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {flags.map((f, i) => (
+          <span key={i} className={`text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${f.color}`}>
+            {f.label}
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   useEffect(() => {
     api.getDistricts()
@@ -183,6 +224,20 @@ export default function ProjectListPage() {
           )}
 
           <select
+            value={projectType}
+            onChange={(e) => { setProjectType(e.target.value); setPage(0); }}
+            className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-700"
+          >
+            <option value="">All Sectors</option>
+            <option value="Community Infrastructure">Community Infrastructure</option>
+            <option value="Roads & Pathways">Roads & Pathways</option>
+            <option value="Drinking Water">Drinking Water</option>
+            <option value="Health & Sanitation">Health & Sanitation</option>
+            <option value="Education">Education</option>
+            <option value="Irrigation">Irrigation</option>
+          </select>
+
+          <select
             value={riskLevel}
             onChange={(e) => { setRiskLevel(e.target.value); setPage(0); }}
             className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-700"
@@ -224,19 +279,20 @@ export default function ProjectListPage() {
                 <th className="px-4 py-3">Progress</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Risk Tier</th>
+                <th className="px-4 py-3">Risk Flags</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan="10" className="px-4 py-8 text-center text-slate-400">
                     Loading registry records...
                   </td>
                 </tr>
               ) : projects.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan="10" className="px-4 py-8 text-center text-slate-400">
                     No matching works found.
                   </td>
                 </tr>
@@ -264,20 +320,22 @@ export default function ProjectListPage() {
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
                     <td className="px-4 py-3"><RiskBadge level={p.riskLevel} score={p.riskScore} /></td>
+                    <td className="px-4 py-3">{renderRiskFlags(p)}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => navigate(`/projects/${p.projectId}`)}
-                          className="px-2.5 py-1 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                          className="px-2.5 py-1 text-xs font-semibold text-slate-800 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer"
                         >
                           Inspect
                         </button>
                         <button
                           onClick={() => navigate(`/reports/${p.projectId}`)}
-                          title="Generate Official Dossier"
-                          className="p-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                          title="Generate Statutory Dossier"
+                          className="px-2.5 py-1 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors cursor-pointer flex items-center gap-1"
                         >
                           <FileText className="w-3.5 h-3.5" />
+                          <span>Dossier</span>
                         </button>
                       </div>
                     </td>
