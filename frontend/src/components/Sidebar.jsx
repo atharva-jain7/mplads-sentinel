@@ -21,7 +21,6 @@ export default function Sidebar() {
     { to: '/dashboard', label: isMP ? 'Constituency Cockpit' : 'Dashboard', icon: LayoutDashboard },
     { to: '/rankings', label: 'Critical Risk Rankings', icon: Flame, badge: 'TOP' },
     { to: '/projects', label: isMP ? 'My Constituency Works' : 'Project Registry', icon: FolderKanban },
-    { to: '/projects/MPL-10482', label: 'Priority Case (MPL-10482)', icon: AlertCircle, highlight: true },
     { to: '/investigation/MPL-10482', label: 'Investigation Workspace', icon: FileSearch },
   ];
 
