@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Lock, User, ArrowRight, Building, UserCheck, Landmark, MapPin } from 'lucide-react';
+import { ShieldCheck, Lock, User, ArrowRight, Building, UserCheck, Landmark, MapPin, AlertCircle, KeyRound } from 'lucide-react';
 import { authService } from '../services/auth';
 
 export default function LoginPage() {
@@ -70,23 +70,53 @@ export default function LoginPage() {
   const [username, setUsername] = useState(roles[0].username);
   const [password, setPassword] = useState('Sentinel@2026');
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const handleSelectRole = (r) => {
     setSelectedRole(r);
     setUsername(r.username);
+    setPassword('Sentinel@2026');
+    setAuthError('');
+  };
+
+  const handleAutoFillJudge = () => {
+    setUsername('sih.judge@nic.in');
+    setPassword('Sentinel@2026');
+    setAuthError('');
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setAuthError('');
+
+    const cleanUser = (username || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    // STRICT VALIDATION: Arbitrary usernames or passwords rejected
+    const allowedUsernames = [
+      'sih.judge@nic.in',
+      'mp.pune@sansad.nic.in',
+      'officer@nic.in',
+      'state.nodal@maharashtra.gov.in',
+      'ministry@nic.in',
+      selectedRole.username.toLowerCase()
+    ];
+
+    if (!allowedUsernames.includes(cleanUser) || cleanPass !== 'Sentinel@2026') {
+      setAuthError('Access Denied: Invalid credentials. Arbitrary usernames or passwords are not permitted under MoSPI authentication policies. Please use the authorized SIH Judge credentials listed below.');
+      return;
+    }
+
     setLoading(true);
 
+    const isSihJudge = cleanUser === 'sih.judge@nic.in';
     const userData = {
       token: `token-${selectedRole.id.toLowerCase()}-2026`,
       username: username,
-      fullName: selectedRole.fullName,
+      fullName: isSihJudge ? "Hon'ble SIH Judge / Evaluator" : selectedRole.fullName,
       role: selectedRole.role,
       roleId: selectedRole.id,
-      designation: selectedRole.designation,
+      designation: isSihJudge ? "SIH 2026 Evaluation Committee" : selectedRole.designation,
       jurisdiction: selectedRole.jurisdiction,
       district: selectedRole.district,
       state: selectedRole.state
@@ -159,6 +189,14 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Auth Error Banner */}
+          {authError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+              <span className="leading-relaxed">{authError}</span>
+            </div>
+          )}
+
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-3 pt-1">
             <div>
@@ -168,8 +206,9 @@ export default function LoginPage() {
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => { setUsername(e.target.value); setAuthError(''); }}
                   required
+                  placeholder="e.g. sih.judge@nic.in"
                   className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                 />
               </div>
@@ -182,7 +221,7 @@ export default function LoginPage() {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setAuthError(''); }}
                   required
                   className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                 />
@@ -194,14 +233,44 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-colors cursor-pointer"
             >
-              <span>Sign In as {selectedRole.name}</span>
+              <span>Sign In as {username.toLowerCase() === 'sih.judge@nic.in' ? 'SIH Judge / Evaluator' : selectedRole.name}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
 
+          {/* SIH Judge Official Credentials Card */}
+          <div className="bg-amber-50/80 border border-amber-200/90 rounded-xl p-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                <KeyRound className="w-3.5 h-3.5 text-amber-700" />
+                <span>SIH Evaluator Fixed Credentials</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleAutoFillJudge}
+                className="text-[11px] font-semibold text-amber-800 hover:text-amber-950 underline cursor-pointer"
+              >
+                Click to Auto-Fill
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-white p-2.5 rounded-lg border border-amber-200/60">
+              <div>
+                <span className="text-slate-400 block text-[10px] font-sans uppercase font-medium">Authorized User ID:</span>
+                <span className="font-bold text-slate-900 select-all">sih.judge@nic.in</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] font-sans uppercase font-medium">Fixed Password:</span>
+                <span className="font-bold text-slate-900 select-all">Sentinel@2026</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-amber-800/90 leading-normal">
+              <b>Security Protocol:</b> Arbitrary username/password combinations are strictly blocked. You can evaluate with <b>sih.judge@nic.in</b> or click any role button above to sign in as that official.
+            </p>
+          </div>
+
           {/* Active Profile Info */}
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-            <span>Profile: <b>{selectedRole.fullName}</b></span>
+            <span>Profile: <b>{username.toLowerCase() === 'sih.judge@nic.in' ? "Hon'ble SIH Judge" : selectedRole.fullName}</b></span>
             <span>{selectedRole.jurisdiction}</span>
           </div>
         </div>

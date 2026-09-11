@@ -164,7 +164,7 @@ export default function LandingPage() {
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Fund Scope</div>
-            <div className="text-2xl font-extrabold text-slate-900 mt-1 font-mono">?5,000+ Cr</div>
+            <div className="text-2xl font-extrabold text-slate-900 mt-1 font-mono">₹5,000+ Cr</div>
             <p className="text-[11px] text-slate-400 mt-0.5">Annual MPLADS entitlement funds</p>
           </div>
 
@@ -301,7 +301,7 @@ export default function LandingPage() {
               <span>MPLADS Sentinel Portal</span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Ministry of Statistics and Programme Implementation ? Government of India
+              Ministry of Statistics and Programme Implementation • Government of India
             </p>
           </div>
 

@@ -104,7 +104,7 @@ export default function RankingsPage() {
         <div className="flex items-center gap-2 text-xs">
           <span className="text-slate-400 font-mono">Sorted by:</span>
           <span className="font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 font-mono">
-            Risk Score (100 ? 0)
+            Risk Score (100 → 0)
           </span>
         </div>
       </div>
@@ -116,8 +116,8 @@ export default function RankingsPage() {
           <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
             {[
               { id: 'ALL', label: 'All Ranked Cases' },
-              { id: 'CRITICAL', label: 'Critical Priority (? 80)' },
-              { id: 'HIGH', label: 'High Attention (? 60)' },
+              { id: 'CRITICAL', label: 'Critical Priority (≥ 80)' },
+              { id: 'HIGH', label: 'High Attention (≥ 60)' },
               { id: 'DELAYED', label: 'Chronically Delayed' }
             ].map((tab) => (
               <button
@@ -214,7 +214,7 @@ export default function RankingsPage() {
                         {p.projectName}
                       </h3>
                       <p className="text-[11px] text-slate-500 mt-0.5">
-                        Agency: <b>{p.implementingAgency || 'District Engineering Cell'}</b> ? Contractor: <b>{p.contractorName || 'Government Registered Contractor'}</b>
+                        Agency: <b>{p.implementingAgency || 'District Engineering Cell'}</b> • Contractor: <b>{p.contractorName || 'Government Registered Contractor'}</b>
                       </p>
                     </div>
                   </div>
@@ -230,7 +230,7 @@ export default function RankingsPage() {
                     </button>
                     <button
                       onClick={() => navigate(`/reports/${p.projectId}`)}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
                     >
                       Dossier
                     </button>
@@ -255,11 +255,11 @@ export default function RankingsPage() {
                   <div className="flex items-center justify-between md:justify-around text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Sanctioned</div>
-                      <div className="font-mono font-bold text-slate-800">?{(p.sanctionedAmount || 0).toLocaleString('en-IN')}</div>
+                      <div className="font-mono font-bold text-slate-800">₹{(p.sanctionedAmount || 0).toLocaleString('en-IN')}</div>
                     </div>
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Disbursed</div>
-                      <div className="font-mono font-bold text-slate-800">?{(p.expenditureAmount || 0).toLocaleString('en-IN')}</div>
+                      <div className="font-mono font-bold text-slate-800">₹{(p.expenditureAmount || 0).toLocaleString('en-IN')}</div>
                     </div>
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Fund Used</div>
