@@ -107,11 +107,11 @@ export default function ReportPage() {
     <div className="space-y-6 max-w-3xl mx-auto pb-12 font-sans">
       <div className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs print:hidden">
         <button
-          onClick={() => navigate(`/projects/${p.projectId || targetProjectId}`)}
+          onClick={() => navigate(`/investigation/${p.projectId || targetProjectId}`)}
           className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Project Profile</span>
+          <span>Back to Investigation Dossier</span>
         </button>
 
         <div className="flex items-center gap-2">

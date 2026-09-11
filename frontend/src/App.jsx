@@ -11,6 +11,8 @@ import ReportPage from './pages/ReportPage';
 import DataImportPage from './pages/DataImportPage';
 import LandingPage from './pages/LandingPage';
 import RankingsPage from './pages/RankingsPage';
+import GISPage from './pages/GISPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 import { authService } from './services/auth';
 
 function ProtectedLayout({ children }) {
@@ -31,13 +33,13 @@ function ProtectedLayout({ children }) {
   );
 }
 
-
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         
+        {/* 1. Executive Overview */}
         <Route
           path="/dashboard"
           element={
@@ -47,6 +49,18 @@ export default function App() {
           }
         />
 
+        {/* 2. Priority Investigation Queue */}
+        <Route
+          path="/priority-cases"
+          element={
+            <ProtectedLayout>
+              <RankingsPage />
+            </ProtectedLayout>
+          }
+        />
+        <Route path="/rankings" element={<Navigate to="/priority-cases" replace />} />
+
+        {/* 3. Project Registry */}
         <Route
           path="/projects"
           element={
@@ -55,7 +69,6 @@ export default function App() {
             </ProtectedLayout>
           }
         />
-
         <Route
           path="/projects/:projectId"
           element={
@@ -65,6 +78,27 @@ export default function App() {
           }
         />
 
+        {/* 4. Dedicated GIS Surveillance */}
+        <Route
+          path="/gis"
+          element={
+            <ProtectedLayout>
+              <GISPage />
+            </ProtectedLayout>
+          }
+        />
+
+        {/* 5. Dedicated Risk & Performance Analytics */}
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedLayout>
+              <AnalyticsPage />
+            </ProtectedLayout>
+          }
+        />
+
+        {/* 6. Investigation Workspace */}
         <Route
           path="/investigation/:projectId"
           element={
@@ -73,7 +107,17 @@ export default function App() {
             </ProtectedLayout>
           }
         />
+        <Route
+          path="/investigations/:projectId"
+          element={
+            <ProtectedLayout>
+              <InvestigationPage />
+            </ProtectedLayout>
+          }
+        />
+        <Route path="/investigations" element={<Navigate to="/investigation/MPL-10482" replace />} />
 
+        {/* 7. Review Reports & Dossiers */}
         <Route
           path="/reports/:reportId"
           element={
@@ -82,24 +126,18 @@ export default function App() {
             </ProtectedLayout>
           }
         />
+        <Route path="/reports" element={<Navigate to="/reports/MPL-10482" replace />} />
 
+        {/* 8. Data & Model Status */}
         <Route
-          path="/import"
+          path="/data"
           element={
             <ProtectedLayout>
               <DataImportPage />
             </ProtectedLayout>
           }
         />
-
-        <Route
-          path="/rankings"
-          element={
-            <ProtectedLayout>
-              <RankingsPage />
-            </ProtectedLayout>
-          }
-        />
+        <Route path="/import" element={<Navigate to="/data" replace />} />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

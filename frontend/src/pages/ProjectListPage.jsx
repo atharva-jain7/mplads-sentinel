@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, FileText, Lock, ShieldAlert, UploadCloud, Globe, Building, Filter } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, FileText, Lock, ShieldAlert, UploadCloud, Globe, Building, Filter, ArrowLeft } from 'lucide-react';
 import { api } from '../services/api';
 import { authService } from '../services/auth';
 import RiskBadge from '../components/RiskBadge';
@@ -167,6 +167,19 @@ export default function ProjectListPage() {
 
   return (
     <div className="space-y-5 font-sans">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <button 
+          onClick={() => navigate('/dashboard')} 
+          className="hover:text-slate-900 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Overview</span>
+        </button>
+        <span>/</span>
+        <span className="text-slate-800 font-semibold">Project Registry</span>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
         <div>
@@ -199,7 +212,7 @@ export default function ProjectListPage() {
             </div>
           )}
           <button
-            onClick={() => navigate('/import')}
+            onClick={() => navigate('/data')}
             className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <UploadCloud className="w-3.5 h-3.5" />

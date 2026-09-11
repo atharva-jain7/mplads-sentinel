@@ -56,10 +56,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [constituencyWorks, setConstituencyWorks] = useState([]);
 
-  // Layered view states
-  const [activeLayer, setActiveLayer] = useState('QUEUE'); // 'QUEUE' | 'GIS' | 'ANALYTICS' | 'COMPLIANCE'
-  const [mpActiveLayer, setMpActiveLayer] = useState('WORKS'); // 'WORKS' | 'ASSETS' | 'GIS'
-
   // Filter states
   const [availableDistricts, setAvailableDistricts] = useState([]);
   const [selectedState, setSelectedState] = useState('');
@@ -491,166 +487,101 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* MP Layer Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2.5">
-            <button
-              onClick={() => setMpActiveLayer('WORKS')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                mpActiveLayer === 'WORKS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Assigned Constituency Works</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                mpActiveLayer === 'WORKS' ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 text-slate-700'
-              }`}>
-                {displayWorks.length}
-              </span>
-            </button>
+          {/* MP Assigned Works & Execution Progress Tracker */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Your Recommended Works & On-Site Execution Progress
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Track physical progress, expenditure disbursements and delays across works assigned to your constituency
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/projects')}
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>View All Constituency Works</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-            <button
-              onClick={() => setMpActiveLayer('ASSETS')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                mpActiveLayer === 'ASSETS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Durable Assets & Compliance Radar</span>
-            </button>
-
-            <button
-              onClick={() => setMpActiveLayer('GIS')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                mpActiveLayer === 'GIS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Constituency GIS Proximity Scanner</span>
-            </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
+                  <tr>
+                    <th className="px-4 py-2.5">Work ID</th>
+                    <th className="px-4 py-2.5">Project Title & Sector</th>
+                    <th className="px-4 py-2.5">Sanctioned (₹)</th>
+                    <th className="px-4 py-2.5">Disbursed (₹)</th>
+                    <th className="px-4 py-2.5">Physical Progress</th>
+                    <th className="px-4 py-2.5">Timeline Status</th>
+                    <th className="px-4 py-2.5">Risk Tier</th>
+                    <th className="px-4 py-2.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {displayWorks.slice(0, 5).map((work) => (
+                    <tr key={work.projectId} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="px-4 py-2.5 font-mono font-semibold text-slate-900">{work.projectId}</td>
+                      <td className="px-4 py-2.5 max-w-xs">
+                        <div className="font-medium text-slate-900">{work.projectName}</div>
+                        <div className="text-[11px] text-slate-400">{work.sector}</div>
+                      </td>
+                      <td className="px-4 py-2.5 font-mono font-medium">₹{work.sanctionedAmount.toLocaleString('en-IN')}</td>
+                      <td className="px-4 py-2.5 font-mono text-slate-600">₹{work.expenditureAmount.toLocaleString('en-IN')}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-14 bg-slate-100 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${work.progressPercentage < 50 && work.delayDays > 0 ? 'bg-rose-500' : 'bg-slate-700'}`}
+                              style={{ width: `${work.progressPercentage}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-[11px] font-semibold">{work.progressPercentage}%</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {work.delayDays > 0 ? (
+                          <span className="text-rose-700 font-mono font-semibold">{work.delayDays}d Delay</span>
+                        ) : (
+                          <span className="text-emerald-700 font-medium">On Schedule</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <RiskBadge level={work.riskLevel} score={work.riskScore} />
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => navigate(`/projects/${work.projectId}`)}
+                            className="px-2.5 py-1 text-xs font-semibold text-slate-800 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer"
+                          >
+                            Inspect
+                          </button>
+                          <button
+                            onClick={() => navigate(`/reports/${work.projectId}`)}
+                            title="Generate Official Dossier"
+                            className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            <FileText className="w-3 h-3" />
+                            <span>Dossier</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Layer 1: MP Assigned Works & Execution Progress Tracker */}
-          {mpActiveLayer === 'WORKS' && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-              <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Your Recommended Works & On-Site Execution Progress
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Track physical progress, expenditure disbursements and delays across works assigned to your constituency
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded border border-blue-200">
-                  {displayWorks.length} Active Portfolio Works
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
-                    <tr>
-                      <th className="px-4 py-2.5">Work ID</th>
-                      <th className="px-4 py-2.5">Project Title & Sector</th>
-                      <th className="px-4 py-2.5">Sanctioned (₹)</th>
-                      <th className="px-4 py-2.5">Disbursed (₹)</th>
-                      <th className="px-4 py-2.5">Physical Progress</th>
-                      <th className="px-4 py-2.5">Timeline Status</th>
-                      <th className="px-4 py-2.5">Risk Tier</th>
-                      <th className="px-4 py-2.5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {displayWorks.map((work) => (
-                      <tr key={work.projectId} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-4 py-2.5 font-mono font-semibold text-slate-900">{work.projectId}</td>
-                        <td className="px-4 py-2.5 max-w-xs">
-                          <div className="font-medium text-slate-900">{work.projectName}</div>
-                          <div className="text-[11px] text-slate-400">{work.sector}</div>
-                        </td>
-                        <td className="px-4 py-2.5 font-mono font-medium">₹{work.sanctionedAmount.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-2.5 font-mono text-slate-600">₹{work.expenditureAmount.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-2.5">
-                          <div className="flex items-center gap-2">
-                            <div className="w-14 bg-slate-100 rounded-full h-1.5">
-                              <div
-                                className={`h-1.5 rounded-full ${work.progressPercentage < 50 && work.delayDays > 0 ? 'bg-rose-500' : 'bg-slate-700'}`}
-                                style={{ width: `${work.progressPercentage}%` }}
-                              />
-                            </div>
-                            <span className="font-mono text-[11px] font-semibold">{work.progressPercentage}%</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          {work.delayDays > 0 ? (
-                            <span className="text-rose-700 font-mono font-semibold">{work.delayDays}d Delay</span>
-                          ) : (
-                            <span className="text-emerald-700 font-medium">On Schedule</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <RiskBadge level={work.riskLevel} score={work.riskScore} />
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => navigate(`/projects/${work.projectId}`)}
-                              className="px-2.5 py-1 text-xs font-semibold text-slate-800 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer"
-                            >
-                              Inspect
-                            </button>
-                            <button
-                              onClick={() => navigate(`/reports/${work.projectId}`)}
-                              title="Generate Official Dossier"
-                              className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
-                            >
-                              <FileText className="w-3 h-3" />
-                              <span>Dossier</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Layer 2: Civic Amenities Asset Creation Tracker & Early Warning Radar */}
-          {mpActiveLayer === 'ASSETS' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <AssetCreationTracker />
-              <EarlyWarningComplianceRadar />
-            </div>
-          )}
-
-          {/* Layer 3: GIS Map of MP's Constituency Works */}
-          {mpActiveLayer === 'GIS' && (
-            <GISMap
-              targetProject={{
-                projectId: 'MPL-10482',
-                projectName: 'Construction of Community Infrastructure',
-                latitude: 18.52043,
-                longitude: 73.85674,
-                riskScore: 94,
-                riskLevel: 'CRITICAL'
-              }}
-              nearbyProjects={[
-                { projectId: 'MPL-9812', projectName: 'Community Hall Renovation Work', latitude: 18.52512, longitude: 73.86145, distanceKm: 0.8, potentialOverlap: true },
-                { projectId: 'MPL-7731', projectName: 'Public Library and Study Hall', latitude: 18.51234, longitude: 73.84912, distanceKm: 1.2, potentialOverlap: false },
-                { projectId: 'MPL-6621', projectName: 'Ward Multipurpose Shed Construction', latitude: 18.53120, longitude: 73.84890, distanceKm: 1.5, potentialOverlap: true }
-              ]}
-              radiusKm={3.0}
-              role="MP"
-            />
-          )}
+          {/* Civic Amenities Asset Creation Tracker & Early Warning Radar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <AssetCreationTracker />
+            <EarlyWarningComplianceRadar />
+          </div>
         </div>
       )}
 
@@ -773,256 +704,280 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Clean Tab Navigation Bar (Section 9) */}
-          <div className="flex items-center gap-1 border-b border-slate-200 pt-1">
-            {[
-              { id: 'QUEUE', label: isDistrict ? 'Field Verification Queue' : 'Priority Cases', count: (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length },
-              { id: 'GIS', label: 'GIS Surveillance' },
-              { id: 'ANALYTICS', label: 'Risk Trends & Analytics' },
-              { id: 'COMPLIANCE', label: 'Compliance Radar' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveLayer(tab.id)}
-                className={`px-3.5 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeLayer === tab.id
-                    ? 'border-slate-900 text-slate-900 bg-white rounded-t-lg border-t border-x border-b-white -mb-px'
-                    : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                }`}
-              >
-                <span>{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span className={`text-[10px] font-mono px-1.5 rounded-full font-bold ${
-                    activeLayer === tab.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {tab.count}
+          {/* Priority Scrutiny Queue (Top 5 Priority Cases Preview) */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                    {isDistrict ? "Field Verification Queue (Pune District)" : "Executive Priority Review Queue"}
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-red-50 text-red-700 font-bold rounded border border-red-200">
+                    Top 5 {isDistrict ? "Operational Action Cases" : "Risk Prioritized Cases"}
                   </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Layer 1: Priority Scrutiny Queue (Main List) */}
-          {activeLayer === 'QUEUE' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                        {isDistrict ? "Field Verification Queue (Pune District)" : "Executive Priority Review Queue"}
-                      </h3>
-                      <span className="text-[10px] font-mono px-2 py-0.5 bg-red-50 text-red-700 font-bold rounded border border-red-200">
-                        {isDistrict ? "Operational Action Queue" : "Risk Prioritized"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isDistrict 
-                        ? 'Prioritized list of works requiring field verification, measurement book auditing, and contractor inspection'
-                        : (filteredQueue !== null
-                          ? `Displaying ${filteredQueue.length} prioritized cases matching active area/sector filter`
-                          : 'Administrative priority cases requiring immediate scrutiny and review')}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        const params = new URLSearchParams();
-                        if (selectedDistrict) params.set('district', selectedDistrict);
-                        if (selectedSector) params.set('projectType', selectedSector);
-                        navigate(`/projects?${params.toString()}`);
-                      }}
-                      className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <span>Open Full Registry</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
                 </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {isDistrict 
+                    ? 'High-urgency works requiring immediate field verification, measurement book auditing, and contractor inspection'
+                    : (filteredQueue !== null
+                      ? `Displaying top 5 of ${filteredQueue.length} prioritized cases matching active filter criteria`
+                      : 'Highest risk works requiring administrative scrutiny, proactive intervention and executive review')}
+                </p>
+              </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
-                      <tr>
-                        <th className="px-4 py-2.5">Priority</th>
-                        <th className="px-4 py-2.5">Project</th>
-                        <th className="px-4 py-2.5">Location</th>
-                        <th className="px-4 py-2.5">Amount</th>
-                        <th className="px-4 py-2.5">Progress</th>
-                        <th className="px-4 py-2.5">Delay</th>
-                        <th className="px-4 py-2.5">Risk</th>
-                        <th className="px-4 py-2.5 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length === 0 ? (
-                        <tr>
-                          <td colSpan="8" className="px-4 py-10 text-center text-slate-400">
-                            No critical cases matching the active filter criteria.
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (selectedDistrict) params.set('district', selectedDistrict);
+                    if (selectedSector) params.set('projectType', selectedSector);
+                    navigate(`/priority-cases${params.toString() ? `?${params.toString()}` : ''}`);
+                  }}
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                >
+                  <span>View Full Priority Queue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (selectedDistrict) params.set('district', selectedDistrict);
+                    if (selectedSector) params.set('projectType', selectedSector);
+                    navigate(`/projects${params.toString() ? `?${params.toString()}` : ''}`);
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200"
+                >
+                  <span>Registry</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
+                  <tr>
+                    <th className="px-4 py-2.5">Priority</th>
+                    <th className="px-4 py-2.5">Project</th>
+                    <th className="px-4 py-2.5">Location</th>
+                    <th className="px-4 py-2.5">Amount</th>
+                    <th className="px-4 py-2.5">Progress</th>
+                    <th className="px-4 py-2.5">Delay</th>
+                    <th className="px-4 py-2.5">Risk</th>
+                    <th className="px-4 py-2.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="px-4 py-10 text-center text-slate-400">
+                        No critical cases matching the active filter criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).slice(0, 5).map((item, index) => {
+                      const pNumber = index + 1;
+                      const pLabel = pNumber < 10 ? `P0${pNumber}` : `P${pNumber}`;
+                      return (
+                        <tr
+                          key={item.projectId}
+                          className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                          onClick={() => navigate(`/investigation/${item.projectId}`)}
+                        >
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono font-bold text-[10px]">
+                                {pLabel}
+                              </span>
+                              <span className="font-mono text-xs text-slate-500">{item.projectId}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 max-w-xs">
+                            <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                              {item.projectName}
+                            </div>
+                            <div className="text-[11px] text-slate-400">{item.projectType || item.sector || 'Infrastructure'}</div>
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-600 text-xs">
+                            <div className="font-medium text-slate-800">{item.district || 'Pune'}</div>
+                            <div className="text-[10px] text-slate-400">{item.state || 'Maharashtra'}</div>
+                          </td>
+                          <td className="px-4 py-2.5 font-mono text-xs">
+                            <div className="font-semibold text-slate-900">
+                              ₹{((item.sanctionedAmount || 2500000) / 100000).toFixed(1)} L
+                            </div>
+                            <div className="text-[10px] text-slate-400">
+                              Disbursed: ₹{((item.expenditureAmount || 1800000) / 100000).toFixed(1)} L
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-14 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div
+                                  className="bg-slate-700 h-1.5 rounded-full"
+                                  style={{ width: `${item.progressPercentage || 40}%` }}
+                                />
+                              </div>
+                              <span className="font-mono text-[11px] font-semibold">{item.progressPercentage || 40}%</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 text-xs">
+                            {(item.delayDays && item.delayDays > 0) ? (
+                              <span className="text-rose-700 font-mono font-semibold">{item.delayDays}d Delay</span>
+                            ) : (
+                              <span className="text-slate-500 font-medium">On Schedule</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <RiskBadge level={item.riskLevel} score={item.riskScore} />
+                          </td>
+                          <td className="px-4 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => navigate(`/investigation/${item.projectId}`)}
+                                className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
+                              >
+                                {isDistrict ? 'Inspect' : 'Investigate'}
+                              </button>
+                              <button
+                                onClick={() => navigate(`/reports/${item.projectId}`)}
+                                title="AI-Generated Review Report"
+                                className="px-2 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <FileText className="w-3 h-3" />
+                                <span>Report</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
-                      ) : (
-                        (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).map((item, index) => {
-                          const pNumber = index + 1;
-                          const pLabel = pNumber < 10 ? `P0${pNumber}` : `P${pNumber}`;
-                          return (
-                            <tr
-                              key={item.projectId}
-                              className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
-                              onClick={() => navigate(`/investigation/${item.projectId}`)}
-                            >
-                              <td className="px-4 py-2.5">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono font-bold text-[10px]">
-                                    {pLabel}
-                                  </span>
-                                  <span className="font-mono text-xs text-slate-500">{item.projectId}</span>
-                                </div>
-                              </td>
-                              <td className="px-4 py-2.5 max-w-xs">
-                                <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                                  {item.projectName}
-                                </div>
-                                <div className="text-[11px] text-slate-400">{item.projectType || item.sector || 'Infrastructure'}</div>
-                              </td>
-                              <td className="px-4 py-2.5 text-slate-600 text-xs">
-                                <div className="font-medium text-slate-800">{item.district || 'Pune'}</div>
-                                <div className="text-[10px] text-slate-400">{item.state || 'Maharashtra'}</div>
-                              </td>
-                              <td className="px-4 py-2.5 font-mono text-xs">
-                                <div className="font-semibold text-slate-900">
-                                  ₹{((item.sanctionedAmount || 2500000) / 100000).toFixed(1)} L
-                                </div>
-                                <div className="text-[10px] text-slate-400">
-                                  Disbursed: ₹{((item.expenditureAmount || 1800000) / 100000).toFixed(1)} L
-                                </div>
-                              </td>
-                              <td className="px-4 py-2.5">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-14 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                    <div
-                                      className="bg-slate-700 h-1.5 rounded-full"
-                                      style={{ width: `${item.progressPercentage || 40}%` }}
-                                    />
-                                  </div>
-                                  <span className="font-mono text-[11px] font-semibold">{item.progressPercentage || 40}%</span>
-                                </div>
-                              </td>
-                              <td className="px-4 py-2.5 text-xs">
-                                {(item.delayDays && item.delayDays > 0) ? (
-                                  <span className="text-rose-700 font-mono font-semibold">{item.delayDays}d Delay</span>
-                                ) : (
-                                  <span className="text-slate-500 font-medium">On Schedule</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-2.5">
-                                <RiskBadge level={item.riskLevel} score={item.riskScore} />
-                              </td>
-                              <td className="px-4 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    onClick={() => navigate(`/investigation/${item.projectId}`)}
-                                    className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
-                                  >
-                                    {isDistrict ? 'Inspect' : 'Investigate'}
-                                  </button>
-                                  <button
-                                    onClick={() => navigate(`/reports/${item.projectId}`)}
-                                    title="AI-Generated Review Report"
-                                    className="px-2 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
-                                  >
-                                    <FileText className="w-3 h-3" />
-                                    <span>Report</span>
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-              </div>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            {/* Implementing Agency Performance Card (Requirement 11 for District) */}
-              {isDistrict && (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Implementing Agency Performance Scrutiny (Pune District)</h4>
-                      <p className="text-xs text-slate-500">Cross-agency execution velocity, delayed work ratios & measurement book auditing</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">
-                      3 Registered Agencies
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
-                      <div className="font-bold text-slate-900 font-sans text-xs">Public Works Department (PWD)</div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>42</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-red-700">48 Days</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-orange-700">14.2%</b></div>
-                      <div className="pt-1 text-[10px] text-amber-800 font-sans font-medium">Field inspection scheduled</div>
-                    </div>
-
-                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
-                      <div className="font-bold text-slate-900 font-sans text-xs">Zilla Parishad Construction Wing</div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>35</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-red-700">31 Days</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-emerald-700">6.8%</b></div>
-                      <div className="pt-1 text-[10px] text-emerald-800 font-sans font-medium">MB entries up to date</div>
-                    </div>
-
-                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
-                      <div className="font-bold text-slate-900 font-sans text-xs">State Water Supply Board</div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>20</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-emerald-700">12 Days</b></div>
-                      <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-emerald-700">2.1%</b></div>
-                      <div className="pt-1 text-[10px] text-blue-800 font-sans font-medium">Compliance verified</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Table Footer: Summary & Link to full queue */}
+            <div className="p-3 bg-slate-50/80 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 px-4 gap-2">
+              <span className="font-mono text-[11px]">
+                Showing top {Math.min(5, (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length)} of {(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length} prioritized cases
+              </span>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (selectedDistrict) params.set('district', selectedDistrict);
+                  if (selectedSector) params.set('projectType', selectedSector);
+                  navigate(`/priority-cases${params.toString() ? `?${params.toString()}` : ''}`);
+                }}
+                className="font-semibold text-slate-900 hover:text-blue-600 flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <span>Open full queue with anomaly & duplicate indicators</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-          )}
+          </div>
 
-          {/* Layer 2: Geospatial Risk Surveillance */}
-          {activeLayer === 'GIS' && (
-            <div className="space-y-4">
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          {/* Implementing Agency Performance Card (Requirement 11 for District) */}
+          {isDistrict && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">National Geospatial Surveillance Layer</h3>
-                  <p className="text-xs text-slate-500">Live geographic clustering and proximity overlap surveillance</p>
+                  <h4 className="text-sm font-bold text-slate-900">Implementing Agency Performance Scrutiny (Pune District)</h4>
+                  <p className="text-xs text-slate-500">Cross-agency execution velocity, delayed work ratios & measurement book auditing</p>
                 </div>
-                <span className="text-xs font-mono font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                  Interactive GIS Grid
+                <span className="text-xs font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">
+                  3 Registered Agencies
                 </span>
               </div>
-              <GISMap role={user.roleId || 'MINISTRY'} />
-            </div>
-          )}
 
-          {/* Layer 3: Statistical Telemetry & Trends */}
-          {activeLayer === 'ANALYTICS' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <RiskDistributionChart distribution={s.riskDistribution} />
-                <ProjectStatusChart distribution={s.statusDistribution} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
+                  <div className="font-bold text-slate-900 font-sans text-xs">Public Works Department (PWD)</div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>42</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-red-700">48 Days</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-orange-700">14.2%</b></div>
+                  <div className="pt-1 text-[10px] text-amber-800 font-sans font-medium">Field inspection scheduled</div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
+                  <div className="font-bold text-slate-900 font-sans text-xs">Zilla Parishad Construction Wing</div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>35</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-red-700">31 Days</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-emerald-700">6.8%</b></div>
+                  <div className="pt-1 text-[10px] text-emerald-800 font-sans font-medium">MB entries up to date</div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-mono text-xs">
+                  <div className="font-bold text-slate-900 font-sans text-xs">State Water Supply Board</div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Assigned Works:</span><b>20</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Avg Delay:</span><b className="text-emerald-700">12 Days</b></div>
+                  <div className="flex justify-between text-[11px] text-slate-600"><span>Cost Overrun Rate:</span><b className="text-emerald-700">2.1%</b></div>
+                  <div className="pt-1 text-[10px] text-blue-800 font-sans font-medium">Compliance verified</div>
+                </div>
               </div>
-              <RiskTrendChart trends={s.monthlyRiskTrend} />
             </div>
           )}
 
-          {/* Layer 4: Durable Asset Creation & Compliance Radar */}
-          {activeLayer === 'COMPLIANCE' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <AssetCreationTracker />
-              <EarlyWarningComplianceRadar />
+          {/* 2-Column Previews: GIS Surveillance & Risk Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Geospatial Risk Surveillance Preview */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Geospatial Risk Surveillance</h4>
+                  <p className="text-xs text-slate-500">Live geographic clustering and proximity overlap surveillance</p>
+                </div>
+                <button
+                  onClick={() => navigate('/gis')}
+                  className="px-2.5 py-1 text-xs font-semibold text-slate-800 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <span>Open Full GIS</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="rounded-xl overflow-hidden border border-slate-200">
+                <GISMap role={user.roleId || 'MINISTRY'} height="330px" />
+              </div>
             </div>
-          )}
+
+            {/* Right: Risk Trends & Analytics Preview */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Risk Trends & Analytics</h4>
+                  <p className="text-xs text-slate-500">Monthly anomaly telemetry and multi-sector risk drift</p>
+                </div>
+                <button
+                  onClick={() => navigate('/analytics')}
+                  className="px-2.5 py-1 text-xs font-semibold text-slate-800 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <span>Open Full Analytics</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="space-y-3">
+                <RiskTrendChart trends={s.monthlyRiskTrend} />
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                    <div className="text-slate-500 text-[11px] font-medium">Critical Risk Works</div>
+                    <div className="text-lg font-bold font-mono text-red-700 mt-0.5">{s.criticalRiskProjects ?? 0}</div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">Composite Score &ge; 80</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                    <div className="text-slate-500 text-[11px] font-medium">High Attention Works</div>
+                    <div className="text-lg font-bold font-mono text-orange-600 mt-0.5">{s.highRiskProjects ?? 0}</div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">Composite Score 60-79</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Durable Asset Creation & Compliance Radar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AssetCreationTracker />
+            <EarlyWarningComplianceRadar />
+          </div>
         </div>
       )}
     </div>

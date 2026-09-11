@@ -29,7 +29,8 @@ export default function GISMap({
   targetProject, 
   nearbyProjects = [], 
   radiusKm = 3.0,
-  role = 'MINISTRY' // 'MINISTRY' | 'STATE' | 'DISTRICT' | 'MP'
+  role = 'MINISTRY', // 'MINISTRY' | 'STATE' | 'DISTRICT' | 'MP'
+  height = '500px'
 }) {
   const navigate = useNavigate();
   const mapContainerRef = useRef(null);
@@ -356,7 +357,7 @@ export default function GISMap({
       <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
         <div
           ref={mapContainerRef}
-          style={{ height: '500px', width: '100%' }}
+          style={{ height, width: '100%' }}
           className="z-10"
         />
 

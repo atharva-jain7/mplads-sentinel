@@ -202,11 +202,32 @@ export default function InvestigationPage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12 font-sans">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <button 
+          onClick={() => navigate('/priority-cases')} 
+          className="hover:text-slate-900 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Priority Cases</span>
+        </button>
+        <span>/</span>
+        <button 
+          onClick={() => navigate('/projects')} 
+          className="hover:text-slate-900 font-medium transition-colors cursor-pointer"
+        >
+          Registry
+        </button>
+        <span>/</span>
+        <span className="text-slate-800 font-semibold">{p.projectId} Dossier</span>
+      </div>
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(`/projects/${p.projectId}`)}
+            onClick={() => navigate('/priority-cases')}
+            title="Back to Priority Cases"
             className="p-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-500 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />

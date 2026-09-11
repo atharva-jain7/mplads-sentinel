@@ -14,7 +14,8 @@ import {
   RefreshCw,
   Activity,
   MapPin,
-  Check
+  Check,
+  ArrowLeft
 } from 'lucide-react';
 import { api } from '../services/api';
 import RiskBadge from '../components/RiskBadge';
@@ -193,13 +194,26 @@ export default function DataImportPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto font-sans pb-12">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <button 
+          onClick={() => navigate('/dashboard')} 
+          className="hover:text-slate-900 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Overview</span>
+        </button>
+        <span>/</span>
+        <span className="text-slate-800 font-semibold">Data & Models</span>
+      </div>
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <UploadCloud className="w-5 h-5 text-slate-800" />
-              Official Dataset Ingestion & Automated AI Pipeline
+              Data Ingestion & AI Model Pipeline
             </h1>
             <span className="text-[10px] font-mono px-2 py-0.5 bg-blue-50 text-blue-700 rounded border border-blue-200 font-bold">
               SIH PROTOTYPE

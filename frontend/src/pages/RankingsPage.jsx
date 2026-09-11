@@ -15,7 +15,8 @@ import {
   MapPin, 
   ShieldAlert,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { api } from '../services/api';
 import { authService } from '../services/auth';
@@ -82,11 +83,23 @@ export default function RankingsPage() {
     <div className="space-y-6 font-sans">
       {/* Top Banner & Header */}
       <div className="space-y-3 pb-2 border-b border-slate-200">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="hover:text-slate-900 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Overview</span>
+          </button>
+          <span>/</span>
+          <span className="text-slate-800 font-semibold">Priority Cases</span>
+        </div>
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                Priority Cases Ranking
+                Priority Investigation Queue
               </h1>
               <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-300 font-bold">
                 RISK SORTED
