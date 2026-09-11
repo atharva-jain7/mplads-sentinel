@@ -323,50 +323,50 @@ export default function ProjectListPage() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[650px] relative">
           <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium sticky top-0 z-10 shadow-xs">
               <tr>
-                <th className="px-4 py-3">Project ID</th>
-                <th className="px-4 py-3">Title & Sector</th>
-                <th className="px-4 py-3">District / State</th>
-                <th className="px-4 py-3">Sanctioned (₹)</th>
-                <th className="px-4 py-3">Expenditure (₹)</th>
-                <th className="px-4 py-3">Progress</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Risk Tier</th>
-                <th className="px-4 py-3">Risk Indicators</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-2.5">Work ID</th>
+                <th className="px-4 py-2.5">Title & Sector</th>
+                <th className="px-4 py-2.5">Location</th>
+                <th className="px-4 py-2.5">Amount</th>
+                <th className="px-4 py-2.5">Progress</th>
+                <th className="px-4 py-2.5">Status & Timeline</th>
+                <th className="px-4 py-2.5">Risk Tier</th>
+                <th className="px-4 py-2.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="10" className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan="8" className="px-4 py-8 text-center text-slate-400">
                     Loading registry records...
                   </td>
                 </tr>
               ) : projects.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan="8" className="px-4 py-8 text-center text-slate-400">
                     No matching works found.
                   </td>
                 </tr>
               ) : (
                 projects.map((p) => (
                   <tr key={p.projectId} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="px-4 py-3 font-mono font-semibold text-slate-900">{p.projectId}</td>
-                    <td className="px-4 py-3 max-w-xs">
+                    <td className="px-4 py-2.5 font-mono font-semibold text-slate-900">{p.projectId}</td>
+                    <td className="px-4 py-2.5 max-w-xs">
                       <div className="font-medium text-slate-900 truncate">{p.projectName}</div>
                       <div className="text-[11px] text-slate-400">{p.projectType}</div>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <div>{p.district}</div>
+                    <td className="px-4 py-2.5 text-slate-600">
+                      <div className="font-medium text-slate-800">{p.district}</div>
                       <div className="text-[10px] text-slate-400">{p.state}</div>
                     </td>
-                    <td className="px-4 py-3 font-mono font-medium">₹{(p.sanctionedAmount || 0).toLocaleString('en-IN')}</td>
-                    <td className="px-4 py-3 font-mono text-slate-600">₹{(p.expenditureAmount || 0).toLocaleString('en-IN')}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 font-mono">
+                      <div className="font-semibold text-slate-900">₹{(p.sanctionedAmount || 0).toLocaleString('en-IN')}</div>
+                      <div className="text-[10px] text-slate-400">Disbursed: ₹{(p.expenditureAmount || 0).toLocaleString('en-IN')}</div>
+                    </td>
+                    <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-slate-100 rounded-full h-1.5">
                           <div className="bg-slate-700 h-1.5 rounded-full" style={{ width: `${p.progressPercentage || 0}%` }} />
@@ -374,10 +374,16 @@ export default function ProjectListPage() {
                         <span className="font-mono text-[11px]">{p.progressPercentage || 0}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
-                    <td className="px-4 py-3"><RiskBadge level={p.riskLevel} score={p.riskScore} /></td>
-                    <td className="px-4 py-3">{renderRiskFlags(p)}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <StatusBadge status={p.status} />
+                        {p.delayDays > 0 && (
+                          <span className="text-[10px] font-mono text-rose-700 font-semibold">{p.delayDays}d Lag</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5"><RiskBadge level={p.riskLevel} score={p.riskScore} /></td>
+                    <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => navigate(`/projects/${p.projectId}`)}
@@ -388,7 +394,7 @@ export default function ProjectListPage() {
                         <button
                           onClick={() => navigate(`/reports/${p.projectId}`)}
                           title="Generate Statutory Dossier"
-                          className="px-2.5 py-1 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors cursor-pointer flex items-center gap-1"
+                          className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
                         >
                           <FileText className="w-3.5 h-3.5" />
                           <span>Dossier</span>

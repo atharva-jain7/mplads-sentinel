@@ -356,7 +356,7 @@ export default function GISMap({
       <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
         <div
           ref={mapContainerRef}
-          style={{ height: '400px', width: '100%' }}
+          style={{ height: '500px', width: '100%' }}
           className="z-10"
         />
 

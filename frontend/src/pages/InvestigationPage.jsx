@@ -20,7 +20,9 @@ import {
   History,
   ClipboardCheck,
   Building,
-  MapPin
+  MapPin,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { api } from '../services/api';
 import { authService } from '../services/auth';
@@ -44,6 +46,14 @@ export default function InvestigationPage() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [expandedCards, setExpandedCards] = useState({
+    mismatch: true,
+    cost: false,
+    delay: false,
+    duplicate: false
+  });
+
+  const toggleCard = (key) => setExpandedCards(prev => ({ ...prev, [key]: !prev[key] }));
 
   // Lifecycle Workflow & Audit Trail (Requirement 5)
   const LIFECYCLE_STAGES = [
@@ -205,8 +215,8 @@ export default function InvestigationPage() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono font-bold text-slate-700">{p.projectId}</span>
               <RiskBadge level={analysis?.riskLevel || p.riskLevel} score={analysis?.riskScore || p.riskScore} />
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-50 text-amber-800 rounded border border-amber-200 font-semibold">
-                AI-GENERATED REVIEW REPORT (SIH PROTOTYPE)
+              <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200 font-semibold">
+                AI Investigation Dossier
               </span>
             </div>
             <h1 className="text-lg font-bold text-slate-900 mt-0.5">{p.projectName}</h1>
@@ -222,6 +232,73 @@ export default function InvestigationPage() {
             <FileText className="w-3.5 h-3.5" />
             <span>Generate Executive Dossier</span>
           </button>
+        </div>
+      </div>
+
+      {/* Immediate 4-Metric Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Sanctioned</span>
+          <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
+            ₹{((p.sanctionedAmount || 3000000) / 100000).toFixed(2)} Lakhs
+          </div>
+          <span className="text-[11px] text-slate-500">Approved Budget</span>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Expenditure</span>
+          <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
+            ₹{((p.expenditureAmount || 2600000) / 100000).toFixed(2)} Lakhs
+          </div>
+          <span className="text-[11px] text-rose-700 font-semibold font-mono">
+            {p.fundUtilizationPercent || ((p.expenditureAmount / (p.sanctionedAmount || 1)) * 100).toFixed(1)}% disbursed
+          </span>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Progress</span>
+          <div className="text-base font-bold font-mono text-slate-900 mt-0.5 flex items-baseline gap-1.5">
+            <span>{p.progressPercentage || 38}%</span>
+            <span className="text-xs font-normal text-slate-400">/ {p.expectedProgressPercentage || 80}% target</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-1 mt-1">
+            <div className="bg-slate-700 h-1 rounded-full" style={{ width: `${p.progressPercentage || 38}%` }} />
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Delay</span>
+          <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
+            {p.delayDays > 0 ? (
+              <span className="text-rose-700 font-bold">{p.delayDays} Days Lag</span>
+            ) : (
+              <span className="text-emerald-700 font-semibold">On Schedule</span>
+            )}
+          </div>
+          <span className="text-[11px] text-slate-500">Target: {p.expectedCompletionDate || '2025-10-31'}</span>
+        </div>
+      </div>
+
+      {/* Risk Assessment Gauge Bar */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl font-black font-mono text-slate-900">
+              {analysis?.riskScore || p.riskScore || 88} <span className="text-xs font-normal text-slate-400">/ 100</span>
+            </div>
+            <div className="h-6 w-px bg-slate-200" />
+            <RiskBadge level={analysis?.riskLevel || p.riskLevel || 'CRITICAL'} score={analysis?.riskScore || p.riskScore || 88} />
+            <span className="text-xs text-slate-500">Composite Multi-Signal Score</span>
+          </div>
+          <div className="text-xs text-slate-600">
+            Major Indicators: <span className="font-semibold text-rose-700">Milestone Gap ({p.progressGap || 48.7}%)</span> • <span className="font-semibold text-amber-700">Schedule Lag ({p.delayDays || 137}d)</span> • <span className="font-semibold text-blue-700">Disbursement Outflow</span>
+          </div>
+        </div>
+        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div
+            className={`h-2 rounded-full ${(analysis?.riskScore || p.riskScore || 88) >= 80 ? 'bg-rose-600' : (analysis?.riskScore || p.riskScore || 88) >= 60 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+            style={{ width: `${Math.min(100, analysis?.riskScore || p.riskScore || 88)}%` }}
+          />
         </div>
       </div>
 
@@ -335,120 +412,140 @@ export default function InvestigationPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* REQUIREMENT 4: EVIDENCE TIMELINE (Recommendation -> Sanction -> Current)   */}
+      {/* WHY THIS CASE WAS FLAGGED (Collapsible / Expandable Anomaly Cards)          */}
       {/* ========================================================================= */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-100">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Evidence Timeline & Milestone Verification</h3>
-            <p className="text-xs text-slate-500">Chronological verification from MP recommendation to on-site progress audit</p>
+            <h3 className="text-sm font-bold text-slate-900">Why This Case Was Flagged</h3>
+            <p className="text-xs text-slate-500">Quantitative anomaly triggers identified by algorithmic models (click cards to inspect evidence)</p>
           </div>
-          <span className="text-xs font-mono text-slate-500 font-semibold">8 Life-cycle Events</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {timelineMilestones.map((m, idx) => (
-            <div
-              key={idx}
-              className={`p-3.5 rounded-xl border space-y-1.5 ${
-                m.status === 'FLAGGED'
-                  ? 'bg-red-50/80 border-red-200'
-                  : m.status === 'OVERDUE'
-                  ? 'bg-amber-50/80 border-amber-200'
-                  : m.status === 'ACTIVE'
-                  ? 'bg-blue-50/80 border-blue-200'
-                  : 'bg-slate-50/70 border-slate-200'
-              }`}
+        <div className="space-y-3 text-xs">
+          {/* Collapsible Card 1: Progress-Spend Mismatch */}
+          <div className="border border-red-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => toggleCard('mismatch')}
+              className="w-full p-3.5 bg-red-50/70 hover:bg-red-50 flex items-center justify-between transition-colors text-left cursor-pointer"
             >
-              <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="font-bold text-slate-800">{m.name}</span>
-                <span className="text-slate-500">{m.date}</span>
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                <div>
+                  <span className="font-bold text-red-900 text-xs">Progress–Spend Mismatch</span>
+                  <span className="text-red-700 text-[11px] ml-2 font-mono">Disbursed {p.fundUtilizationPercent || 86.7}% vs Physical {p.progressPercentage || 38.0}% (Gap: -{p.progressGap || 48.7}%)</span>
+                </div>
               </div>
-              <p className="text-xs text-slate-700 leading-relaxed font-sans">{m.detail}</p>
-              <div className="pt-1">
-                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                  m.status === 'FLAGGED' ? 'bg-red-600 text-white' :
-                  m.status === 'OVERDUE' ? 'bg-amber-600 text-white' :
-                  m.status === 'ACTIVE' ? 'bg-blue-600 text-white' : 'bg-emerald-100 text-emerald-800'
-                }`}>
-                  {m.status}
-                </span>
+              <div className="flex items-center gap-1.5 text-red-700">
+                <span className="text-[10px] font-mono uppercase font-bold">{expandedCards.mismatch ? 'Hide Details' : 'View Evidence'}</span>
+                {expandedCards.mismatch ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* REQUIREMENT 4: ANOMALY EVIDENCE BREAKDOWN CARDS                            */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Specific Anomaly Signals & Supporting Evidence</h3>
-            <p className="text-xs text-slate-500">Quantitative verification metrics showing exactly why this work was prioritized</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          {/* Signal 1: Progress-Spend Mismatch */}
-          <div className="p-4 bg-red-50/60 border border-red-200 rounded-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-red-900 uppercase tracking-wider text-[11px]">Progress–Spend Mismatch</span>
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-            </div>
-            <div className="space-y-1 font-mono text-xs">
-              <div className="flex justify-between"><span>Physical Progress on Site:</span><b>{p.progressPercentage || 38.0}%</b></div>
-              <div className="flex justify-between"><span>Expenditure Disbursed:</span><b className="text-red-700">{p.fundUtilizationPercent || 86.7}%</b></div>
-              <div className="flex justify-between"><span>Expected Milestone:</span><b>{p.expectedProgressPercentage || 80.0}%</b></div>
-              <div className="flex justify-between pt-1 border-t border-red-200 text-red-900 font-bold">
-                <span>Variance (Gap):</span>
-                <span>-{p.progressGap || 48.7}%</span>
+            </button>
+            {expandedCards.mismatch && (
+              <div className="p-4 bg-white border-t border-red-100 space-y-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div><span className="text-slate-500 block text-[10px]">Physical Progress:</span><b>{p.progressPercentage || 38.0}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Funds Disbursed:</span><b className="text-red-700">{p.fundUtilizationPercent || 86.7}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Expected Progress:</span><b>{p.expectedProgressPercentage || 80.0}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Net Gap:</span><b className="text-red-700">-{p.progressGap || 48.7}%</b></div>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
+                  86.7% of public funds were disbursed from the treasury while only 38% of civil construction has been executed on-site. The contractor has drawn down mobilization and progress payments ahead of physical inspection milestones.
+                </p>
               </div>
-            </div>
-            <p className="text-[11px] text-red-800/80 font-sans pt-1">
-              86.7% of public funds were disbursed while only 38% of physical civil work has been completed.
-            </p>
+            )}
           </div>
 
-          {/* Signal 2: Cost Anomaly */}
-          <div className="p-4 bg-orange-50/60 border border-orange-200 rounded-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-orange-900 uppercase tracking-wider text-[11px]">Cost Anomaly</span>
-              <DollarSign className="w-4 h-4 text-orange-600" />
-            </div>
-            <div className="space-y-1 font-mono text-xs">
-              <div className="flex justify-between"><span>Sanctioned Budget:</span><b>₹{(p.sanctionedAmount || 3000000).toLocaleString('en-IN')}</b></div>
-              <div className="flex justify-between"><span>Disbursed Outflow:</span><b>₹{(p.expenditureAmount || 2600000).toLocaleString('en-IN')}</b></div>
-              <div className="flex justify-between"><span>Peer Benchmark Cost:</span><b>₹{(p.estimatedCost || 2400000).toLocaleString('en-IN')}</b></div>
-              <div className="flex justify-between pt-1 border-t border-orange-200 text-orange-900 font-bold">
-                <span>Budget Variance:</span>
-                <span>+₹{Math.max(0, (p.expenditureAmount || 2600000) - (p.estimatedCost || 2400000)).toLocaleString('en-IN')}</span>
+          {/* Collapsible Card 2: Cost Anomaly */}
+          <div className="border border-orange-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => toggleCard('cost')}
+              className="w-full p-3.5 bg-orange-50/70 hover:bg-orange-50 flex items-center justify-between transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <DollarSign className="w-4 h-4 text-orange-600 shrink-0" />
+                <div>
+                  <span className="font-bold text-orange-900 text-xs">Cost Rate Anomaly</span>
+                  <span className="text-orange-800 text-[11px] ml-2 font-mono">Sanctioned: ₹{((p.sanctionedAmount || 3000000) / 100000).toFixed(1)}L • Peer Benchmark: ₹{((p.estimatedCost || 2400000) / 100000).toFixed(1)}L</span>
+                </div>
               </div>
-            </div>
-            <p className="text-[11px] text-orange-800/80 font-sans pt-1">
-              Unit rate of civil construction is 2.3x higher than similar works in {p.district || 'Pune'} district.
-            </p>
+              <div className="flex items-center gap-1.5 text-orange-700">
+                <span className="text-[10px] font-mono uppercase font-bold">{expandedCards.cost ? 'Hide Details' : 'View Evidence'}</span>
+                {expandedCards.cost ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </div>
+            </button>
+            {expandedCards.cost && (
+              <div className="p-4 bg-white border-t border-orange-100 space-y-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div><span className="text-slate-500 block text-[10px]">Sanctioned Budget:</span><b>₹{(p.sanctionedAmount || 3000000).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Disbursed Outflow:</span><b>₹{(p.expenditureAmount || 2600000).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Peer Benchmark:</span><b>₹{(p.estimatedCost || 2400000).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Variance vs Peer:</span><b className="text-orange-700">+₹{Math.max(0, (p.expenditureAmount || 2600000) - (p.estimatedCost || 2400000)).toLocaleString('en-IN')}</b></div>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
+                  Unit rates estimated for civil masonry and concrete are 2.3x higher than similar works completed in {p.district || 'Pune'} district over the last 24 months. Itemized measurement book validation is warranted.
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Signal 3: Schedule Overdue */}
-          <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">Timeline Variance</span>
-              <Clock className="w-4 h-4 text-amber-600" />
-            </div>
-            <div className="space-y-1 font-mono text-xs">
-              <div className="flex justify-between"><span>Sanction Date:</span><b>{p.sanctionDate || '2025-01-15'}</b></div>
-              <div className="flex justify-between"><span>Target Completion:</span><b>{p.expectedCompletionDate || '2025-10-31'}</b></div>
-              <div className="flex justify-between"><span>Recorded Delay:</span><b className="text-red-700">{p.delayDays || 137} Days</b></div>
-              <div className="flex justify-between pt-1 border-t border-amber-200 text-amber-900 font-bold">
-                <span>Status:</span>
-                <span className="text-red-700">CHRONICALLY DELAYED</span>
+          {/* Collapsible Card 3: Schedule Delay */}
+          <div className="border border-amber-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => toggleCard('delay')}
+              className="w-full p-3.5 bg-amber-50/70 hover:bg-amber-50 flex items-center justify-between transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                <div>
+                  <span className="font-bold text-amber-900 text-xs">Schedule Delay & Timeline Slippage</span>
+                  <span className="text-amber-800 text-[11px] ml-2 font-mono">{p.delayDays || 137} days overdue beyond approved deadline</span>
+                </div>
               </div>
-            </div>
-            <p className="text-[11px] text-amber-800/80 font-sans pt-1">
-              Project execution is overdue by more than 4 months without formal sanction extension on file.
-            </p>
+              <div className="flex items-center gap-1.5 text-amber-700">
+                <span className="text-[10px] font-mono uppercase font-bold">{expandedCards.delay ? 'Hide Details' : 'View Evidence'}</span>
+                {expandedCards.delay ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </div>
+            </button>
+            {expandedCards.delay && (
+              <div className="p-4 bg-white border-t border-amber-100 space-y-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div><span className="text-slate-500 block text-[10px]">Sanction Date:</span><b>{p.sanctionDate || '2025-01-15'}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Original Deadline:</span><b>{p.expectedCompletionDate || '2025-10-31'}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Recorded Lag:</span><b className="text-rose-700">{p.delayDays || 137} Days</b></div>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
+                  Civil execution has exceeded the sanctioned completion timeframe by over 4 months. No formal extension approval or force majeure endorsement was detected in district administrative records.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible Card 4: Geospatial Proximity / Duplicate */}
+          <div className="border border-blue-200 rounded-xl overflow-hidden">
+            <button
+              onClick={() => toggleCard('duplicate')}
+              className="w-full p-3.5 bg-blue-50/70 hover:bg-blue-50 flex items-center justify-between transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <Compass className="w-4 h-4 text-blue-600 shrink-0" />
+                <div>
+                  <span className="font-bold text-blue-900 text-xs">Geospatial Proximity & Duplicate Risk</span>
+                  <span className="text-blue-800 text-[11px] ml-2 font-mono">{nearbyProjects.length} works located within 3 km radius</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-blue-700">
+                <span className="text-[10px] font-mono uppercase font-bold">{expandedCards.duplicate ? 'Hide Details' : 'View Evidence'}</span>
+                {expandedCards.duplicate ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </div>
+            </button>
+            {expandedCards.duplicate && (
+              <div className="p-4 bg-white border-t border-blue-100 space-y-2">
+                <p className="text-xs text-slate-700 leading-relaxed font-sans">
+                  The spatial clustering engine identified {nearbyProjects.length} other public works sanctioned in close geographic proximity. Cross-scheme verification ensures no double-invoicing or duplicate asset creation with state/panchayat funds.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

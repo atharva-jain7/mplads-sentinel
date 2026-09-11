@@ -85,27 +85,22 @@ export default function RankingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold shadow-xs">
-                <Flame className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                  <span>Priority Investigation Queue</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-red-100 text-red-700 rounded-full border border-red-200 font-bold">
-                    PRIORITY INVESTIGATION QUEUE
-                  </span>
-                </h1>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Dynamic multi-signal risk prioritization to triage supervisory audits and field inspections
-                </p>
-              </div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                Priority Cases Ranking
+              </h1>
+              <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-300 font-bold">
+                RISK SORTED
+              </span>
             </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Multi-signal risk ranking to triage supervisory audits and field investigations across registered works
+            </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 font-mono">Prioritized by:</span>
+            <span className="text-slate-400 font-mono">Sorted by:</span>
             <span className="font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 font-mono">
-              Composite Risk (100 → 0)
+              Composite Risk Score (100 → 0)
             </span>
           </div>
         </div>
@@ -198,24 +193,14 @@ export default function RankingsPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <div className="flex items-start gap-3">
                     {/* Priority Queue Badge */}
-                    <div
-                      className={`w-14 h-12 rounded-xl flex flex-col items-center justify-center font-mono font-extrabold text-sm shrink-0 border ${
-                        rankNumber === 1
-                          ? 'bg-red-600 text-white border-red-700 shadow-xs'
-                          : rankNumber <= 3
-                          ? 'bg-red-50 text-red-700 border-red-200'
-                          : isCritical
-                          ? 'bg-amber-50 text-amber-900 border-amber-200'
-                          : 'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}
-                    >
-                      <span className="text-[8px] font-sans font-bold leading-none uppercase tracking-wider">Priority</span>
-                      <span className="leading-tight text-sm font-bold">{rankNumber < 10 ? `0${rankNumber}` : rankNumber}</span>
+                    <div className="w-12 h-11 rounded-lg bg-slate-900 text-white flex flex-col items-center justify-center font-mono font-bold text-xs shrink-0 shadow-xs">
+                      <span className="text-[8px] uppercase tracking-wider text-slate-400">Rank</span>
+                      <span className="text-sm font-black">{rankNumber < 10 ? `P0${rankNumber}` : `P${rankNumber}`}</span>
                     </div>
 
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-slate-900">{p.projectId}</span>
+                        <span className="text-xs font-mono font-bold text-slate-700">{p.projectId}</span>
                         <RiskBadge level={p.riskLevel} score={p.riskScore} />
                         <StatusBadge status={p.status} />
                         <span className="text-[11px] font-medium text-slate-500 font-mono">
@@ -236,14 +221,14 @@ export default function RankingsPage() {
                   <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                     <button
                       onClick={() => navigate(`/investigation/${p.projectId}`)}
-                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                     >
                       <FileSearch className="w-3.5 h-3.5" />
-                      <span>Investigate Evidence</span>
+                      <span>Investigate</span>
                     </button>
                     <button
                       onClick={() => navigate(`/reports/${p.projectId}`)}
-                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
                     >
                       Dossier
                     </button>

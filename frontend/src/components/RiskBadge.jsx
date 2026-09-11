@@ -2,41 +2,42 @@ import React from 'react';
 import Tooltip from './Tooltip';
 
 export default function RiskBadge({ level, score }) {
-  const lvl = (level || 'LOW').toUpperCase();
+  const rawLvl = (level || 'LOW').toUpperCase();
+  const lvl = rawLvl === 'MEDIUM' ? 'MODERATE' : rawLvl;
   
   const styles = {
-    CRITICAL: 'bg-red-50 text-red-700 border-red-200/90 hover:bg-red-100',
-    HIGH: 'bg-orange-50 text-orange-700 border-orange-200/90 hover:bg-orange-100',
-    MEDIUM: 'bg-amber-50 text-amber-700 border-amber-200/90 hover:bg-amber-100',
-    LOW: 'bg-emerald-50 text-emerald-700 border-emerald-200/90 hover:bg-emerald-100'
+    CRITICAL: 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100',
+    HIGH: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
+    MODERATE: 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100',
+    LOW: 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
   };
 
   const dotColors = {
-    CRITICAL: 'bg-red-500',
-    HIGH: 'bg-orange-500',
-    MEDIUM: 'bg-amber-500',
+    CRITICAL: 'bg-rose-500',
+    HIGH: 'bg-amber-500',
+    MODERATE: 'bg-blue-500',
     LOW: 'bg-emerald-500'
   };
 
   const descriptions = {
-    CRITICAL: 'Critical Risk Tier (Score 80-100): Multi-signal anomaly detected across physical progress lag, expenditure outpaces schedule, or spatial duplicate. Mandatory on-site MB audit required.',
-    HIGH: 'High Risk Tier (Score 60-79): Elevated timeline delay (>90 days) or budget variance exceeding 20%. Nodal officer review recommended.',
-    MEDIUM: 'Medium Risk Tier (Score 30-59): Minor execution variance within acceptable operational thresholds. Monitored on standard quarterly schedule.',
-    LOW: 'Low Risk Tier (Score 0-29): Normal project execution parameters in full compliance with sanctioned milestone targets.'
+    CRITICAL: 'Critical Risk (Score 80-100): Anomaly signals flagged across timeline, budget, or duplicate sanctions. Priority administrative review recommended.',
+    HIGH: 'High Risk (Score 60-79): Significant schedule delay (>90 days) or budget variance. Supervisory attention recommended.',
+    MODERATE: 'Moderate Risk (Score 30-59): Minor execution variance within acceptable operational thresholds.',
+    LOW: 'Low Risk (Score 0-29): Project execution parameters compliant with sanctioned milestone targets.'
   };
 
   return (
     <Tooltip
-      title={`${lvl} RISK CLASSIFICATION`}
+      title={`${lvl} RISK TIER`}
       content={descriptions[lvl] || descriptions.LOW}
       position="top"
     >
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold border transition-colors cursor-help ${styles[lvl] || styles.LOW}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors cursor-help font-mono whitespace-nowrap ${styles[lvl] || styles.LOW}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${dotColors[lvl] || dotColors.LOW}`} />
         <span>{lvl}</span>
-        {score !== undefined && (
-          <span className="font-mono font-bold ml-0.5 text-[11px] opacity-80">
-            ({score})
+        {score !== undefined && score !== null && (
+          <span className="font-bold opacity-90">
+            · {score}
           </span>
         )}
       </span>

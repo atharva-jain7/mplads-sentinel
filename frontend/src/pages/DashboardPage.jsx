@@ -556,49 +556,48 @@ export default function DashboardPage() {
                 <table className="w-full text-left text-xs text-slate-700">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
                     <tr>
-                      <th className="px-4 py-3">Work ID</th>
-                      <th className="px-4 py-3">Project Title & Sector</th>
-                      <th className="px-4 py-3">Sanctioned (₹)</th>
-                      <th className="px-4 py-3">Disbursed (₹)</th>
-                      <th className="px-4 py-3">Physical Progress</th>
-                      <th className="px-4 py-3">Timeline Status</th>
-                      <th className="px-4 py-3">Risk Tier</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
+                      <th className="px-4 py-2.5">Work ID</th>
+                      <th className="px-4 py-2.5">Project Title & Sector</th>
+                      <th className="px-4 py-2.5">Sanctioned (₹)</th>
+                      <th className="px-4 py-2.5">Disbursed (₹)</th>
+                      <th className="px-4 py-2.5">Physical Progress</th>
+                      <th className="px-4 py-2.5">Timeline Status</th>
+                      <th className="px-4 py-2.5">Risk Tier</th>
+                      <th className="px-4 py-2.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {displayWorks.map((work) => (
                       <tr key={work.projectId} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-4 py-3 font-mono font-semibold text-slate-900">{work.projectId}</td>
-                        <td className="px-4 py-3 max-w-xs">
+                        <td className="px-4 py-2.5 font-mono font-semibold text-slate-900">{work.projectId}</td>
+                        <td className="px-4 py-2.5 max-w-xs">
                           <div className="font-medium text-slate-900">{work.projectName}</div>
                           <div className="text-[11px] text-slate-400">{work.sector}</div>
-                          <div className="text-[10px] text-amber-700 mt-0.5 font-medium">{work.attention}</div>
                         </td>
-                        <td className="px-4 py-3 font-mono font-medium">₹{work.sanctionedAmount.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3 font-mono text-slate-600">₹{work.expenditureAmount.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-2.5 font-mono font-medium">₹{work.sanctionedAmount.toLocaleString('en-IN')}</td>
+                        <td className="px-4 py-2.5 font-mono text-slate-600">₹{work.expenditureAmount.toLocaleString('en-IN')}</td>
+                        <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
                             <div className="w-14 bg-slate-100 rounded-full h-1.5">
                               <div
-                                className={`h-1.5 rounded-full ${work.progressPercentage < 50 && work.delayDays > 0 ? 'bg-red-500' : 'bg-slate-700'}`}
+                                className={`h-1.5 rounded-full ${work.progressPercentage < 50 && work.delayDays > 0 ? 'bg-rose-500' : 'bg-slate-700'}`}
                                 style={{ width: `${work.progressPercentage}%` }}
                               />
                             </div>
                             <span className="font-mono text-[11px] font-semibold">{work.progressPercentage}%</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-2.5">
                           {work.delayDays > 0 ? (
-                            <span className="text-red-700 font-mono font-semibold">{work.delayDays}d Delay</span>
+                            <span className="text-rose-700 font-mono font-semibold">{work.delayDays}d Delay</span>
                           ) : (
                             <span className="text-emerald-700 font-medium">On Schedule</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-2.5">
                           <RiskBadge level={work.riskLevel} score={work.riskScore} />
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-2.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => navigate(`/projects/${work.projectId}`)}
@@ -609,7 +608,7 @@ export default function DashboardPage() {
                             <button
                               onClick={() => navigate(`/reports/${work.projectId}`)}
                               title="Generate Official Dossier"
-                              className="px-2.5 py-1 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors cursor-pointer flex items-center gap-1"
+                              className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
                             >
                               <FileText className="w-3 h-3" />
                               <span>Dossier</span>
@@ -660,281 +659,147 @@ export default function DashboardPage() {
       {/* ========================================================================= */}
       {!isMP && (
         <div className="space-y-6">
-          {/* Executive Area & Parliamentary Scrutiny Filter Bar */}
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center font-bold">
-                  <Filter className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Executive Scope & Area Scrutiny Filter
-                  </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Filter dashboard telemetry, anomaly signals, and priority queue by State, Area/Constituency, Hon'ble MP, or Sector
-                  </p>
-                </div>
-              </div>
+          {/* Top 6 KPI Cards (Above the fold - Section 6 & 7) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <KPICard
+              title={isMinistry ? "Total Works" : isState ? "State Works" : "District Works"}
+              value={s.totalProjects || (isDistrict ? 97 : isState ? 248 : 1250)}
+              subtitle={isMinistry ? "PAN-India registry" : isState ? "Maharashtra portfolio" : "Pune District"}
+            />
+            
+            <KPICard
+              title="₹ at Risk"
+              value={`₹${(((s.rupeesAtRisk || (isDistrict ? 7800000 : isState ? 19800000 : 42800000))) / 10000000).toFixed(2)} Cr`}
+              subtitle="High/critical exposure"
+            />
 
-              <div className="flex items-center gap-2">
-                {(selectedState || selectedDistrict || selectedMP || selectedSector) && (
-                  <button
-                    onClick={handleResetFilters}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>Reset</span>
-                  </button>
-                )}
+            <KPICard
+              title="Critical Cases"
+              value={s.criticalRisk || (isDistrict ? 4 : isState ? 12 : 47)}
+              subtitle="+8 flagged this month"
+            />
+            
+            <KPICard
+              title="High Attention"
+              value={s.highRisk || (isDistrict ? 18 : isState ? 54 : 186)}
+              subtitle="Schedule & cost lag"
+            />
+            
+            <KPICard
+              title="Extended Delays"
+              value={s.delayed || (isDistrict ? 22 : isState ? 68 : 312)}
+              subtitle=">90 days overdue"
+            />
+            
+            <KPICard
+              title="Potential Duplicates"
+              value={s.potentialDuplicates || (isDistrict ? 3 : isState ? 9 : 34)}
+              subtitle="GIS proximity overlaps"
+            />
+          </div>
 
-                <button
-                  onClick={() => {
-                    const params = new URLSearchParams();
-                    if (selectedDistrict) params.set('district', selectedDistrict);
-                    if (selectedSector) params.set('projectType', selectedSector);
-                    navigate(`/projects?${params.toString()}`);
-                  }}
-                  className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <span>View in Project Registry</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
+          {/* Compact Horizontal Filter Toolbar (Section 8) */}
+          <div className="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 mr-1">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <span>Filters:</span>
+              </span>
 
-            {/* Filter Select Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* State Filter */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                  State / Territory
-                </label>
+              {isMinistry && (
                 <select
                   value={selectedState}
                   onChange={(e) => handleStateChange(e.target.value)}
-                  className="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-none focus:border-slate-800 font-medium"
+                  className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 font-medium"
                 >
                   <option value="">All States (National)</option>
                   {availableStates.map((st) => (
                     <option key={st} value={st}>{st}</option>
                   ))}
                 </select>
-              </div>
+              )}
 
-              {/* Area / Constituency Filter */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                  Area / Constituency / District
-                </label>
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => handleDistrictChange(e.target.value)}
-                  className="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-none focus:border-slate-800 font-medium"
-                >
-                  <option value="">All Areas & Constituencies</option>
-                  {displayedDistricts.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={selectedDistrict}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 font-medium"
+              >
+                <option value="">{isDistrict ? 'Pune District (Locked)' : 'All Districts / Areas'}</option>
+                {displayedDistricts.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
 
-              {/* Hon'ble MP Filter */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                  Hon'ble Member of Parliament
-                </label>
-                <select
-                  value={selectedMP}
-                  onChange={(e) => handleMPChange(e.target.value)}
-                  className="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-none focus:border-slate-800 font-medium"
-                >
-                  <option value="">All Hon'ble MPs</option>
-                  {MP_CONSTITUENCY_DATA.map((item) => (
-                    <option key={item.mp} value={item.mp}>
-                      {item.mp} ({item.constituency})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={selectedSector}
+                onChange={(e) => setSelectedSector(e.target.value)}
+                className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 font-medium"
+              >
+                <option value="">All Sectors</option>
+                <option value="Community Infrastructure">Community Infrastructure</option>
+                <option value="Roads & Pathways">Roads & Pathways</option>
+                <option value="Drinking Water">Drinking Water</option>
+                <option value="Health & Sanitation">Health & Sanitation</option>
+                <option value="Education">Education</option>
+                <option value="Irrigation">Irrigation</option>
+              </select>
 
-              {/* Development Sector Filter */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                  Development Sector
-                </label>
-                <select
-                  value={selectedSector}
-                  onChange={(e) => setSelectedSector(e.target.value)}
-                  className="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-none focus:border-slate-800 font-medium"
+              {(selectedState || selectedDistrict || selectedMP || selectedSector) && (
+                <button
+                  onClick={handleResetFilters}
+                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-xs font-medium cursor-pointer transition-colors"
                 >
-                  <option value="">All Development Sectors</option>
-                  <option value="Community Infrastructure">Community Infrastructure</option>
-                  <option value="Roads & Pathways">Roads & Pathways</option>
-                  <option value="Drinking Water">Drinking Water</option>
-                  <option value="Health & Sanitation">Health & Sanitation</option>
-                  <option value="Education">Education</option>
-                  <option value="Irrigation">Irrigation</option>
-                </select>
-              </div>
+                  Reset
+                </button>
+              )}
             </div>
 
-            {/* Active Scope Tag Pill */}
-            {(selectedState || selectedDistrict || selectedMP || selectedSector) && (
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 pt-1">
-                <span className="font-semibold text-slate-700">Active Scope:</span>
-                <span className="font-mono bg-blue-50 text-blue-800 px-2 py-0.5 rounded border border-blue-200">
-                  {[selectedState, selectedDistrict, selectedMP, selectedSector].filter(Boolean).join(' • ')}
-                </span>
-                {filtering && <span className="text-amber-600 animate-pulse text-[10px] font-mono">Filtering live database queue...</span>}
-              </div>
-            )}
-          </div>
-
-          {/* Data Quality & Dataset Prototype Indicator (Requirement 1 & 13) */}
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-800 font-mono text-[10px] font-bold rounded border border-blue-200 uppercase">
-                {s.datasetType || 'Demonstration Dataset'}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-500 font-mono">
+                Showing <b>{(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length}</b> of <b>{s.totalProjects || (isDistrict ? 97 : isState ? 248 : 1250)}</b> works
               </span>
-              <span className="text-slate-700 font-medium">
-                Scope: <b>{s.jurisdictionLabel || (isDistrict ? 'Pune District Administration' : isState ? 'Maharashtra State Level' : 'National Central Oversight')}</b>
-              </span>
-              <span className="text-slate-300 hidden sm:inline">•</span>
-              <span className="text-slate-500 font-mono text-[11px]">
-                Records analyzed: <b>{s.totalProjects || (isDistrict ? 97 : isState ? 248 : 1250)}</b>
-              </span>
-              <span className="text-slate-300 hidden sm:inline">•</span>
-              <span className="text-slate-500 font-mono text-[11px]">
-                Last updated: {s.dataQuality?.lastUpdated || new Date().toLocaleTimeString('en-IN')}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono">
-              <span className="text-slate-400 font-sans uppercase text-[10px] font-bold">Data Quality:</span>
-              <span>Financial: <b>{s.dataQuality?.financialCompleteness || 98.4}%</b></span>
-              <span>Progress: <b>{s.dataQuality?.progressCompleteness || 95.8}%</b></span>
-              <span>GPS: <b>{s.dataQuality?.gpsCompleteness || 97.1}%</b></span>
-              <span>Completion: <b>{s.dataQuality?.completionCompleteness || 93.5}%</b></span>
-              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 font-bold rounded border border-emerald-200">
-                Score: {s.dataQuality?.overallScore || 96.2}%
-              </span>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (selectedDistrict) params.set('district', selectedDistrict);
+                  if (selectedSector) params.set('projectType', selectedSector);
+                  navigate(`/projects?${params.toString()}`);
+                }}
+                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-slate-200"
+              >
+                <span>Registry</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
 
-          {/* Top 7 Dynamic KPI Cards (Requirement 1 & 9) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            <KPICard
-              title={isMinistry ? "All-India Works" : isState ? "State Works" : "District Works"}
-              value={s.totalProjects || (isDistrict ? 97 : isState ? 248 : 1250)}
-              icon={FolderKanban}
-              color="slate"
-            />
-            
-            {/* ₹ at Risk Dynamic Financial KPI (Requirement 9) */}
-            <div className="bg-white p-4 rounded-xl border border-rose-200 shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800">₹ at Risk</span>
-                <Tooltip 
-                  title="₹ AT RISK CALCULATION" 
-                  content="Expenditure associated with currently high/critical-risk projects. This is a monitoring metric and does not represent confirmed financial loss."
-                  position="top"
-                >
-                  <AlertOctagon className="w-4 h-4 text-rose-600 cursor-help" />
-                </Tooltip>
-              </div>
-              <div className="text-xl font-bold font-mono text-slate-900 mt-2">
-                ₹{(((s.rupeesAtRisk || (isDistrict ? 7800000 : isState ? 19800000 : 42800000))) / 10000000).toFixed(2)} Cr
-              </div>
-              <span className="text-[10px] text-slate-400 font-mono mt-0.5">High/Critical Outflow</span>
-            </div>
-
-            <KPICard
-              title="Critical Priority"
-              value={s.criticalRisk || (isDistrict ? 4 : isState ? 12 : 47)}
-              icon={AlertOctagon}
-              color="red"
-            />
-            <KPICard
-              title="High Attention"
-              value={s.highRisk || (isDistrict ? 18 : isState ? 54 : 186)}
-              icon={AlertTriangle}
-              color="orange"
-            />
-            <KPICard
-              title="Delayed Execution"
-              value={s.delayed || (isDistrict ? 22 : isState ? 68 : 312)}
-              icon={Clock}
-              color="amber"
-            />
-            <KPICard
-              title="Cost Overruns"
-              value={s.costAnomalies || (isDistrict ? 11 : isState ? 35 : 142)}
-              icon={TrendingUp}
-              color="red"
-            />
-            <KPICard
-              title="Potential Duplicates"
-              value={s.potentialDuplicates || (isDistrict ? 3 : isState ? 9 : 34)}
-              icon={Copy}
-              color="orange"
-            />
-          </div>
-
-          {/* Executive Layer Selector Navigation */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2.5">
-            <button
-              onClick={() => setActiveLayer('QUEUE')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                activeLayer === 'QUEUE'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Priority Scrutiny Queue</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                activeLayer === 'QUEUE' ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 text-slate-700'
-              }`}>
-                {(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveLayer('GIS')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                activeLayer === 'GIS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Geospatial Risk Surveillance</span>
-            </button>
-
-            <button
-              onClick={() => setActiveLayer('ANALYTICS')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                activeLayer === 'ANALYTICS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Statistical Telemetry & Trends</span>
-            </button>
-
-            <button
-              onClick={() => setActiveLayer('COMPLIANCE')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                activeLayer === 'COMPLIANCE'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Durable Assets & Compliance Radar</span>
-            </button>
+          {/* Clean Tab Navigation Bar (Section 9) */}
+          <div className="flex items-center gap-1 border-b border-slate-200 pt-1">
+            {[
+              { id: 'QUEUE', label: isDistrict ? 'Field Verification Queue' : 'Priority Cases', count: (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length },
+              { id: 'GIS', label: 'GIS Surveillance' },
+              { id: 'ANALYTICS', label: 'Risk Trends & Analytics' },
+              { id: 'COMPLIANCE', label: 'Compliance Radar' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveLayer(tab.id)}
+                className={`px-3.5 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeLayer === tab.id
+                    ? 'border-slate-900 text-slate-900 bg-white rounded-t-lg border-t border-x border-b-white -mb-px'
+                    : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-[10px] font-mono px-1.5 rounded-full font-bold ${
+                    activeLayer === tab.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
 
           {/* Layer 1: Priority Scrutiny Queue (Main List) */}
@@ -980,62 +845,62 @@ export default function DashboardPage() {
                   <table className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
                       <tr>
-                        <th className="px-4 py-3">Priority & Work ID</th>
-                        <th className="px-4 py-3">Project Title & Sector</th>
-                        <th className="px-4 py-3">District / Jurisdiction</th>
-                        <th className="px-4 py-3">Financial Scope</th>
-                        <th className="px-4 py-3">Physical Progress</th>
-                        <th className="px-4 py-3">Risk Tier</th>
-                        <th className="px-4 py-3">Anomaly Trigger</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <th className="px-4 py-2.5">Priority</th>
+                        <th className="px-4 py-2.5">Project</th>
+                        <th className="px-4 py-2.5">Location</th>
+                        <th className="px-4 py-2.5">Amount</th>
+                        <th className="px-4 py-2.5">Progress</th>
+                        <th className="px-4 py-2.5">Delay</th>
+                        <th className="px-4 py-2.5">Risk</th>
+                        <th className="px-4 py-2.5 text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {(filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).length === 0 ? (
                         <tr>
-                          <td colSpan="8" className="px-4 py-12 text-center text-slate-400">
+                          <td colSpan="8" className="px-4 py-10 text-center text-slate-400">
                             No critical cases matching the active filter criteria.
                           </td>
                         </tr>
                       ) : (
                         (filteredQueue !== null ? filteredQueue : (s.priorityQueue || [])).map((item, index) => {
                           const pNumber = index + 1;
-                          const pLabel = pNumber < 10 ? `Priority 0${pNumber}` : `Priority ${pNumber}`;
+                          const pLabel = pNumber < 10 ? `P0${pNumber}` : `P${pNumber}`;
                           return (
                             <tr
                               key={item.projectId}
                               className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                               onClick={() => navigate(`/investigation/${item.projectId}`)}
                             >
-                              <td className="px-4 py-3.5">
-                                <div className="flex items-center gap-2">
-                                  <span className="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px]">
+                              <td className="px-4 py-2.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono font-bold text-[10px]">
                                     {pLabel}
                                   </span>
-                                  <span className="font-mono font-bold text-slate-900">{item.projectId}</span>
+                                  <span className="font-mono text-xs text-slate-500">{item.projectId}</span>
                                 </div>
                               </td>
-                              <td className="px-4 py-3.5 max-w-xs">
+                              <td className="px-4 py-2.5 max-w-xs">
                                 <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                                   {item.projectName}
                                 </div>
-                                <div className="text-[11px] text-slate-400 mt-0.5">{item.projectType || 'Community Infrastructure'}</div>
+                                <div className="text-[11px] text-slate-400">{item.projectType || item.sector || 'Infrastructure'}</div>
                               </td>
-                              <td className="px-4 py-3.5 text-slate-600">
+                              <td className="px-4 py-2.5 text-slate-600 text-xs">
                                 <div className="font-medium text-slate-800">{item.district || 'Pune'}</div>
                                 <div className="text-[10px] text-slate-400">{item.state || 'Maharashtra'}</div>
                               </td>
-                              <td className="px-4 py-3.5 font-mono">
+                              <td className="px-4 py-2.5 font-mono text-xs">
                                 <div className="font-semibold text-slate-900">
                                   ₹{((item.sanctionedAmount || 2500000) / 100000).toFixed(1)} L
                                 </div>
                                 <div className="text-[10px] text-slate-400">
-                                  Disbursed: ₹{((item.expenditureAmount || 1800000) / 100000).toFixed(1)}L
+                                  Disbursed: ₹{((item.expenditureAmount || 1800000) / 100000).toFixed(1)} L
                                 </div>
                               </td>
-                              <td className="px-4 py-3.5">
+                              <td className="px-4 py-2.5">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                  <div className="w-14 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                     <div
                                       className="bg-slate-700 h-1.5 rounded-full"
                                       style={{ width: `${item.progressPercentage || 40}%` }}
@@ -1044,38 +909,40 @@ export default function DashboardPage() {
                                   <span className="font-mono text-[11px] font-semibold">{item.progressPercentage || 40}%</span>
                                 </div>
                               </td>
-                          <td className="px-4 py-3.5">
-                            <RiskBadge level={item.riskLevel} score={item.riskScore} />
-                          </td>
-                          <td className="px-4 py-3.5 max-w-xs">
-                            <span className="text-[11px] font-medium text-amber-800 bg-amber-50 px-2 py-0.8 rounded border border-amber-200 block truncate">
-                              {item.primaryFlag || 'Multi-model milestone & budget discrepancy'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => navigate(`/investigation/${item.projectId}`)}
-                                className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                              >
-                                {isDistrict ? 'Investigate' : 'Inspect'}
-                              </button>
-                              <button
-                                onClick={() => navigate(`/reports/${item.projectId}`)}
-                                title="AI-Generated Review Report"
-                                className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
-                              >
-                                <FileText className="w-3 h-3" />
-                                <span>Report</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                  </tbody>
-                </table>
+                              <td className="px-4 py-2.5 text-xs">
+                                {(item.delayDays && item.delayDays > 0) ? (
+                                  <span className="text-rose-700 font-mono font-semibold">{item.delayDays}d Delay</span>
+                                ) : (
+                                  <span className="text-slate-500 font-medium">On Schedule</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-2.5">
+                                <RiskBadge level={item.riskLevel} score={item.riskScore} />
+                              </td>
+                              <td className="px-4 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => navigate(`/investigation/${item.projectId}`)}
+                                    className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
+                                  >
+                                    {isDistrict ? 'Inspect' : 'Investigate'}
+                                  </button>
+                                  <button
+                                    onClick={() => navigate(`/reports/${item.projectId}`)}
+                                    title="AI-Generated Review Report"
+                                    className="px-2 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    <span>Report</span>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
               </div>
             </div>
 
