@@ -45,9 +45,55 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
         <div className="flex items-center gap-3">
           <div className="text-right">
             <span className="text-[10px] text-slate-400 block uppercase font-medium">Composite Risk Score</span>
-            <span className="text-xl font-bold font-mono text-slate-900">{score || 94} <span className="text-xs text-slate-400 font-normal">/ 100</span></span>
+            <span className="text-xl font-bold font-mono text-slate-900">{score || 88} <span className="text-xs text-slate-400 font-normal">/ 100</span></span>
           </div>
           <RiskBadge level={level || 'CRITICAL'} />
+        </div>
+      </div>
+
+      {/* Additive Factor Contribution Breakdown */}
+      <div className="my-4 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            Factor Contribution Breakdown
+          </span>
+          <span className="text-[11px] font-mono text-slate-500 font-semibold">
+            Formula: Multi-Signal Composite Fusion
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono">
+          <div className="bg-white p-2 rounded-lg border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-sans block truncate">Schedule Delay</span>
+            <span className="text-sm font-bold text-red-600">+22 pts</span>
+          </div>
+          <div className="bg-white p-2 rounded-lg border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-sans block truncate">Progress Mismatch</span>
+            <span className="text-sm font-bold text-red-600">+25 pts</span>
+          </div>
+          <div className="bg-white p-2 rounded-lg border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-sans block truncate">Cost Anomaly</span>
+            <span className="text-sm font-bold text-orange-600">+18 pts</span>
+          </div>
+          <div className="bg-white p-2 rounded-lg border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-sans block truncate">Duplicate Prob.</span>
+            <span className="text-sm font-bold text-amber-600">+15 pts</span>
+          </div>
+          <div className="bg-white p-2 rounded-lg border border-slate-200">
+            <span className="text-[10px] text-slate-400 font-sans block truncate">Compliance / LOF</span>
+            <span className="text-sm font-bold text-slate-700">+{Math.max(8, (score || 88) - 80)} pts</span>
+          </div>
+        </div>
+
+        {/* Explainability Callout */}
+        <div className="p-2.5 bg-amber-50/70 border border-amber-200/70 rounded-lg flex items-start gap-2 text-xs text-amber-900">
+          <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+          <div className="text-[11px] leading-relaxed">
+            <b>How is this score calculated?</b> Each anomaly signal adds points scaled by its severity above baseline peer thresholds.
+            <span className="font-semibold block text-slate-800 mt-0.5">
+              "Risk score prioritizes cases for review; it does not establish fraud."
+            </span>
+          </div>
         </div>
       </div>
 

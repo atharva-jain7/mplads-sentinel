@@ -38,6 +38,10 @@ public interface ProjectRepository extends JpaRepository<Project, String> {
     List<Project> findTop10ByOrderByRiskScoreDesc();
 
     List<Project> findByDistrict(String district);
+    List<Project> findByState(String state);
+
+    List<Project> findTop10ByDistrictOrderByRiskScoreDesc(String district);
+    List<Project> findTop10ByStateOrderByRiskScoreDesc(String state);
 
     @Query("SELECT DISTINCT p.district FROM Project p ORDER BY p.district")
     List<String> findDistinctDistricts();

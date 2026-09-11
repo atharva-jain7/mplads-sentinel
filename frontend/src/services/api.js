@@ -21,8 +21,10 @@ export const api = {
     return res.json();
   },
 
-  async getDashboardSummary() {
-    const res = await fetch(`${API_BASE}/dashboard/summary`, {
+  async getDashboardSummary(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const url = query ? `${API_BASE}/dashboard/summary?${query}` : `${API_BASE}/dashboard/summary`;
+    const res = await fetch(url, {
       headers: getHeaders()
     });
     if (!res.ok) throw new Error('Failed to fetch dashboard summary');

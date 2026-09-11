@@ -16,7 +16,9 @@ public class DashboardController {
     private DashboardService dashboardService;
 
     @GetMapping("/summary")
-    public ResponseEntity<DashboardSummaryDTO> getSummary() {
-        return ResponseEntity.ok(dashboardService.getDashboardSummary());
+    public ResponseEntity<DashboardSummaryDTO> getSummary(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String district,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String state) {
+        return ResponseEntity.ok(dashboardService.getDashboardSummary(district, state));
     }
 }

@@ -19,11 +19,11 @@ export default function BenfordChart({ distribution, isAnomaly, deviationScore }
     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
         <div>
-          <h4 className="text-sm font-bold text-slate-900">Benford's Law Financial Distribution</h4>
-          <p className="text-xs text-slate-500">Expected vs Observed First-Digit Frequency across Payment Records</p>
+          <h4 className="text-sm font-bold text-slate-900">Financial Digit Pattern Anomaly (Benford's Law Screening)</h4>
+          <p className="text-xs text-slate-500">Payment values show an unusual first-digit distribution relative to the reference dataset. This is a screening signal requiring financial verification.</p>
         </div>
-        <div className="text-right">
-          <span className="text-xs text-slate-400">Deviation:</span>
+        <div className="text-right shrink-0">
+          <span className="text-xs text-slate-400">Signal Deviation:</span>
           <span className="ml-1 font-mono font-bold text-slate-800">{deviationScore || 72}/100</span>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function BenfordChart({ distribution, isAnomaly, deviationScore }
           </span>
         </div>
         <span className="text-slate-600 text-[11px]">
-          Unusual financial digit distribution — review recommended.
+          Screening signal requiring financial verification. Benford's Law is presented as an anomaly signal, NOT proof of fraud.
         </span>
       </div>
     </div>

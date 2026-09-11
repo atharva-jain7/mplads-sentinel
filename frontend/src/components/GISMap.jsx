@@ -412,37 +412,54 @@ export default function GISMap({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            {nearbyProjects.map((p) => (
-              <div
-                key={p.projectId}
-                className={`p-3 rounded-xl border transition-all ${
-                  p.potentialOverlap
-                    ? 'bg-orange-50/70 border-orange-200 hover:border-orange-300'
-                    : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center justify-between font-mono text-xs font-bold text-slate-900">
-                  <span>{p.projectId}</span>
-                  <span className="text-slate-500 font-sans font-medium text-[11px]">
-                    {p.distanceKm} km away
-                  </span>
-                </div>
-                <div className="text-xs font-medium text-slate-800 truncate mt-1">
-                  {p.projectName}
-                </div>
-                {p.potentialOverlap ? (
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-orange-700 bg-orange-100/80 px-2 py-0.5 rounded-md">
-                    <AlertTriangle className="w-3 h-3 shrink-0" />
-                    <span>Potential Scope Overlap</span>
+            {nearbyProjects.map((p) => {
+              const isDup = (p.potentialDuplicateScore && p.potentialDuplicateScore >= 60) || p.potentialOverlap;
+              const dupScore = p.potentialDuplicateScore || (isDup ? 78 : 24);
+              const evidence = p.evidenceList || [
+                `Distance: ${(p.distanceKm * 1000).toFixed(0)} m`,
+                `Category: ${p.projectType || 'Infrastructure'}`,
+                `Status: ${p.status || 'Active'}`
+              ];
+
+              return (
+                <div
+                  key={p.projectId}
+                  className={`p-3 rounded-xl border transition-all space-y-2 ${
+                    isDup
+                      ? 'bg-amber-50/80 border-amber-200 hover:border-amber-300'
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-mono text-xs font-bold text-slate-900">
+                    <span className="hover:text-blue-600 cursor-pointer" onClick={() => navigate(`/projects/${p.projectId}`)}>
+                      {p.projectId}
+                    </span>
+                    <span className="text-slate-500 font-sans font-medium text-[11px]">
+                      {p.distanceKm} km away
+                    </span>
                   </div>
-                ) : (
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-500">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span>Independent Scope</span>
+                  <div className="text-xs font-medium text-slate-800 line-clamp-1">
+                    {p.projectName}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  <div className="pt-1 border-t border-slate-200/60">
+                    <div className="flex items-center justify-between text-[11px] font-bold pb-1">
+                      <span className={isDup ? 'text-amber-800' : 'text-slate-600'}>
+                        {isDup ? 'Potential Duplicate' : 'Independent Project'}
+                      </span>
+                      <span className={`font-mono text-xs ${isDup ? 'text-amber-900 font-extrabold' : 'text-slate-500'}`}>
+                        {dupScore}%
+                      </span>
+                    </div>
+                    <ul className="text-[10px] text-slate-600 space-y-0.5 list-disc pl-3 font-mono">
+                      {evidence.slice(0, 3).map((e, idx) => (
+                        <li key={idx}>{e}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

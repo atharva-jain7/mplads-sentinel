@@ -15,6 +15,12 @@ public class DashboardSummaryDTO {
     private Map<String, Long> statusDistribution;
     private List<Map<String, Object>> monthlyRiskTrend;
     private List<Map<String, Object>> priorityQueue;
+    private Double rupeesAtRisk;
+    private Double totalSanctioned;
+    private Double totalDisbursed;
+    private String jurisdictionLabel;
+    private String datasetType = "Demonstration Dataset";
+    private Map<String, Object> dataQuality;
 
     public long getTotalProjects() { return totalProjects; }
     public void setTotalProjects(long totalProjects) { this.totalProjects = totalProjects; }
@@ -38,4 +44,17 @@ public class DashboardSummaryDTO {
     public void setMonthlyRiskTrend(List<Map<String, Object>> monthlyRiskTrend) { this.monthlyRiskTrend = monthlyRiskTrend; }
     public List<Map<String, Object>> getPriorityQueue() { return priorityQueue; }
     public void setPriorityQueue(List<Map<String, Object>> priorityQueue) { this.priorityQueue = priorityQueue; }
+
+    public Double getRupeesAtRisk() { return rupeesAtRisk; }
+    public void setRupeesAtRisk(Double rupeesAtRisk) { this.rupeesAtRisk = rupeesAtRisk; }
+    public Double getTotalSanctioned() { return totalSanctioned; }
+    public void setTotalSanctioned(Double totalSanctioned) { this.totalSanctioned = totalSanctioned; }
+    public Double getTotalDisbursed() { return totalDisbursed; }
+    public void setTotalDisbursed(Double totalDisbursed) { this.totalDisbursed = totalDisbursed; }
+    public String getJurisdictionLabel() { return jurisdictionLabel; }
+    public void setJurisdictionLabel(String jurisdictionLabel) { this.jurisdictionLabel = jurisdictionLabel; }
+    public String getDatasetType() { return datasetType; }
+    public void setDatasetType(String datasetType) { this.datasetType = datasetType; }
+    public Map<String, Object> getDataQuality() { return dataQuality; }
+    public void setDataQuality(Map<String, Object> dataQuality) { this.dataQuality = dataQuality; }
 }

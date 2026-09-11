@@ -4,9 +4,7 @@ import com.sih26102.sentinel.dto.NearbyProjectDTO;
 import com.sih26102.sentinel.model.Project;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GISService {
@@ -20,6 +18,20 @@ public class GISService {
                 Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return Math.round(EARTH_RADIUS_KM * c * 100.0) / 100.0;
+    }
+
+    private double computeWordOverlap(String s1, String s2) {
+        if (s1 == null || s2 == null) return 0.0;
+        Set<String> words1 = new HashSet<>(Arrays.asList(s1.toLowerCase().split("\\W+")));
+        Set<String> words2 = new HashSet<>(Arrays.asList(s2.toLowerCase().split("\\W+")));
+        words1.removeIf(w -> w.length() < 3);
+        words2.removeIf(w -> w.length() < 3);
+        if (words1.isEmpty() || words2.isEmpty()) return 0.0;
+        Set<String> intersection = new HashSet<>(words1);
+        intersection.retainAll(words2);
+        Set<String> union = new HashSet<>(words1);
+        union.addAll(words2);
+        return ((double) intersection.size()) / union.size();
     }
 
     public List<NearbyProjectDTO> findNearbyProjects(Project target, List<Project> pool, double maxRadiusKm) {
@@ -48,10 +60,57 @@ public class GISService {
                 dto.setLongitude(p.getLongitude());
                 dto.setDistanceKm(dist);
 
-                boolean sameType = target.getProjectType().equalsIgnoreCase(p.getProjectType());
-                boolean isPotentialOverlap = dist <= 2.0 && sameType;
-                dto.setPotentialOverlap(isPotentialOverlap);
-                dto.setRelationType(isPotentialOverlap ? "POTENTIAL_OVERLAP" : "PROXIMITY_ONLY");
+                // Multi-factor duplicate evaluation
+                List<String> evidence = new ArrayList<>();
+                int dupScore = 0;
+
+                // 1. Distance factor
+                if (dist < 0.5) {
+                    dupScore += 35;
+                    evidence.add(String.format("Distance: %.0f m (Immediate Proximity)", dist * 1000));
+                } else if (dist < 1.0) {
+                    dupScore += 25;
+                    evidence.add(String.format("Distance: %.0f m", dist * 1000));
+                } else if (dist < 2.0) {
+                    dupScore += 15;
+                    evidence.add(String.format("Distance: %.1f km", dist));
+                } else {
+                    dupScore += 5;
+                    evidence.add(String.format("Distance: %.1f km", dist));
+                }
+
+                // 2. Category match
+                boolean sameType = target.getProjectType() != null && target.getProjectType().equalsIgnoreCase(p.getProjectType());
+                if (sameType) {
+                    dupScore += 30;
+                    evidence.add("Same Asset Category: " + p.getProjectType());
+                }
+
+                // 3. Name & description text overlap
+                double overlap = computeWordOverlap(target.getProjectName(), p.getProjectName());
+                if (overlap > 0.2) {
+                    int overlapPts = (int) Math.min(25, Math.round(overlap * 35));
+                    dupScore += overlapPts;
+                    evidence.add(String.format("Title similarity: %.0f%% lexical overlap", overlap * 100));
+                }
+
+                // 4. Financial cost similarity
+                if (target.getSanctionedAmount() != null && p.getSanctionedAmount() != null && target.getSanctionedAmount() > 0) {
+                    double maxCost = Math.max(target.getSanctionedAmount(), p.getSanctionedAmount());
+                    double costDiffRatio = Math.abs(target.getSanctionedAmount() - p.getSanctionedAmount()) / maxCost;
+                    if (costDiffRatio < 0.25) {
+                        dupScore += 15;
+                        evidence.add(String.format("Cost alignment: within %.0f%% sanctioned budget", costDiffRatio * 100));
+                    }
+                }
+
+                dupScore = Math.min(96, dupScore);
+                dto.setPotentialDuplicateScore(dupScore);
+                dto.setEvidenceList(evidence);
+
+                boolean isPotentialDup = dupScore >= 60;
+                dto.setPotentialOverlap(isPotentialDup);
+                dto.setRelationType(isPotentialDup ? "POTENTIAL_DUPLICATE" : "PROXIMITY_ONLY");
 
                 results.add(dto);
             }

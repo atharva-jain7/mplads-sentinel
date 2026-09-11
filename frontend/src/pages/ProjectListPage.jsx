@@ -45,31 +45,65 @@ export default function ProjectListPage() {
     const pGap = p.progressGap || (p.expectedProgressPercentage && p.progressPercentage ? Math.max(0, p.expectedProgressPercentage - p.progressPercentage) : 0);
     
     if (pGap > 15) {
-      flags.push({ label: `Lag ${pGap.toFixed(0)}%`, color: 'bg-red-50 text-red-700 border-red-200' });
+      flags.push({ label: `Physical Lag (${pGap.toFixed(0)}%)`, severity: 'high' });
     }
     if (p.delayDays > 30) {
-      flags.push({ label: `${p.delayDays}d Delayed`, color: 'bg-amber-50 text-amber-800 border-amber-200' });
+      flags.push({ label: `Schedule Delay (${p.delayDays}d overdue)`, severity: 'high' });
     }
     if ((p.expenditureAmount && p.sanctionedAmount && p.expenditureAmount > p.sanctionedAmount) || (p.fundUtilizationPercent && p.fundUtilizationPercent > 100)) {
-      flags.push({ label: 'Cost Overrun', color: 'bg-rose-50 text-rose-800 border-rose-200' });
+      flags.push({ label: 'Expenditure Exceeds Sanction', severity: 'critical' });
     }
     if (p.riskScore >= 80) {
-      flags.push({ label: 'Proximity Overlap', color: 'bg-purple-50 text-purple-700 border-purple-200' });
+      flags.push({ label: 'Proximity & Scope Overlap', severity: 'critical' });
     }
     if (p.riskScore >= 60 && flags.length === 0) {
-      flags.push({ label: 'Milestone Discrepancy', color: 'bg-orange-50 text-orange-700 border-orange-200' });
-    }
-    if (flags.length === 0) {
-      flags.push({ label: 'Compliant', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' });
+      flags.push({ label: 'Milestone Discrepancy Signal', severity: 'medium' });
     }
 
+    if (flags.length === 0) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Compliant
+        </span>
+      );
+    }
+
+    const hasCritical = flags.some(f => f.severity === 'critical') || p.riskScore >= 80;
+    const hasHigh = flags.some(f => f.severity === 'high') || p.riskScore >= 60;
+
     return (
-      <div className="flex flex-wrap gap-1">
-        {flags.map((f, i) => (
-          <span key={i} className={`text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${f.color}`}>
-            {f.label}
-          </span>
-        ))}
+      <div className="relative group inline-block">
+        <button
+          type="button"
+          tabIndex={0}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border cursor-help transition-all ${
+            hasCritical
+              ? 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'
+              : hasHigh
+              ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+              : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+          }`}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${hasCritical ? 'bg-rose-500' : hasHigh ? 'bg-amber-500' : 'bg-slate-400'}`} />
+          <span>{flags.length} Risk Indicator{flags.length > 1 ? 's' : ''}</span>
+        </button>
+
+        {/* Hover / Focus Tooltip Popover */}
+        <div className="absolute right-0 sm:left-0 bottom-full mb-1.5 hidden group-hover:flex group-focus-within:flex flex-col gap-1.5 z-40 p-2.5 bg-slate-900 text-white rounded-lg shadow-xl text-[11px] min-w-[220px] border border-slate-700 pointer-events-none">
+          <div className="font-semibold text-slate-300 pb-1 border-b border-slate-800 flex items-center justify-between">
+            <span>Detected Risk Signals</span>
+            <span className="text-[10px] text-amber-400 font-mono">({flags.length} active)</span>
+          </div>
+          {flags.map((f, i) => (
+            <div key={i} className="flex items-start gap-1.5 text-slate-200">
+              <span className="text-amber-400 font-bold mt-0.5">•</span>
+              <span className="leading-tight">{f.label}</span>
+            </div>
+          ))}
+          <div className="pt-1 text-[9px] text-slate-400 border-t border-slate-800 italic">
+            Screening signal only • Does not establish fraud
+          </div>
+        </div>
       </div>
     );
   };
@@ -249,6 +283,28 @@ export default function ProjectListPage() {
             <option value="LOW">Low</option>
           </select>
 
+          <select
+            value={`${sortBy}_${sortDirection}`}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === 'riskScore_desc') { setSortBy('riskScore'); setSortDirection('desc'); }
+              else if (val === 'expenditureAmount_desc') { setSortBy('expenditureAmount'); setSortDirection('desc'); }
+              else if (val === 'fundUtilizationPercent_desc') { setSortBy('fundUtilizationPercent'); setSortDirection('desc'); }
+              else if (val === 'delayDays_desc') { setSortBy('delayDays'); setSortDirection('desc'); }
+              else if (val === 'progressPercentage_asc') { setSortBy('progressPercentage'); setSortDirection('asc'); }
+              else if (val === 'updatedAt_desc') { setSortBy('updatedAt'); setSortDirection('desc'); }
+              setPage(0);
+            }}
+            className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-700 font-medium"
+          >
+            <option value="riskScore_desc">Sort: Highest Risk (Default)</option>
+            <option value="expenditureAmount_desc">Sort: Highest Expenditure</option>
+            <option value="fundUtilizationPercent_desc">Sort: Largest Cost Variance</option>
+            <option value="delayDays_desc">Sort: Longest Delay</option>
+            <option value="progressPercentage_asc">Sort: Lowest Progress</option>
+            <option value="updatedAt_desc">Sort: Recently Updated</option>
+          </select>
+
           <button
             type="submit"
             className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium cursor-pointer"
@@ -279,7 +335,7 @@ export default function ProjectListPage() {
                 <th className="px-4 py-3">Progress</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Risk Tier</th>
-                <th className="px-4 py-3">Risk Flags</th>
+                <th className="px-4 py-3">Risk Indicators</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>

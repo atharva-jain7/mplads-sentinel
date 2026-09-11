@@ -81,31 +81,44 @@ export default function RankingsPage() {
   return (
     <div className="space-y-6 font-sans">
       {/* Top Banner & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold shadow-xs">
-              <Flame className="w-5 h-5" />
+      <div className="space-y-3 pb-2 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold shadow-xs">
+                <Flame className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <span>Priority Investigation Queue</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-red-100 text-red-700 rounded-full border border-red-200 font-bold">
+                    PRIORITY INVESTIGATION QUEUE
+                  </span>
+                </h1>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Dynamic multi-signal risk prioritization to triage supervisory audits and field inspections
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>Critical Risk Project Rankings</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-red-100 text-red-700 rounded-full border border-red-200 font-bold">
-                  NATIONAL LEADERBOARD
-                </span>
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Dynamic national ranking of works ordered by composite criticalness and multi-signal anomaly severity
-              </p>
-            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-400 font-mono">Prioritized by:</span>
+            <span className="font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 font-mono">
+              Composite Risk (100 → 0)
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400 font-mono">Sorted by:</span>
-          <span className="font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 font-mono">
-            Risk Score (100 → 0)
-          </span>
+        {/* Administrative Review Guidance Disclaimer */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-start gap-2.5">
+          <ShieldAlert className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-semibold text-slate-800">Administrative Review Guidance: </span>
+            <span>
+              Ranking is based on a composite risk score combining financial anomalies, timeline slippage, spatial proximity, and audit trail discrepancies. Intended to guide administrative review, not determine culpability or establish legal wrongdoing.
+            </span>
+          </div>
         </div>
       </div>
 
@@ -184,9 +197,9 @@ export default function RankingsPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <div className="flex items-start gap-3">
-                    {/* Rank Badge */}
+                    {/* Priority Queue Badge */}
                     <div
-                      className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center font-mono font-extrabold text-sm shrink-0 border ${
+                      className={`w-14 h-12 rounded-xl flex flex-col items-center justify-center font-mono font-extrabold text-sm shrink-0 border ${
                         rankNumber === 1
                           ? 'bg-red-600 text-white border-red-700 shadow-xs'
                           : rankNumber <= 3
@@ -196,8 +209,8 @@ export default function RankingsPage() {
                           : 'bg-slate-100 text-slate-700 border-slate-200'
                       }`}
                     >
-                      <span className="text-[9px] font-sans font-bold leading-none uppercase">Rank</span>
-                      <span className="leading-tight">#{rankNumber}</span>
+                      <span className="text-[8px] font-sans font-bold leading-none uppercase tracking-wider">Priority</span>
+                      <span className="leading-tight text-sm font-bold">{rankNumber < 10 ? `0${rankNumber}` : rankNumber}</span>
                     </div>
 
                     <div>

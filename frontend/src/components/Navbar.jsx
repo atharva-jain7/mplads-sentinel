@@ -38,18 +38,21 @@ export default function Navbar() {
   return (
     <header className="bg-slate-900 text-white sticky top-0 z-50 border-b border-slate-800 font-sans">
       <div className="bg-[#071321] border-b border-slate-800/80 px-6 py-1 text-[11px] text-slate-400">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-200">भारत सरकार</span>
             <span>•</span>
             <span className="font-semibold text-slate-300">GOVERNMENT OF INDIA</span>
             <span>•</span>
             <span className="text-slate-400 hidden sm:inline">Ministry of Statistics and Programme Implementation (MoSPI)</span>
+            <span className="text-[10px] px-2 py-0.2 bg-amber-500/20 text-amber-300 rounded border border-amber-500/40 font-mono">
+              SIH Prototype
+            </span>
           </div>
           <div className="flex items-center gap-3 text-[10px] text-slate-400">
-            <span className="inline-flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              National Sentinel Active
+            <span className="inline-flex items-center gap-1.5 font-mono text-slate-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Prototype Monitoring System • SIH 2026
             </span>
           </div>
         </div>
@@ -67,7 +70,7 @@ export default function Navbar() {
                 {badge.label}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 leading-none">Decision Support & Monitoring Platform</p>
+            <p className="text-[10px] text-slate-400 leading-none">Decision Support & Risk Screening Platform</p>
           </div>
         </div>
 

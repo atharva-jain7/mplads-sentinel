@@ -15,6 +15,8 @@ public class NearbyProjectDTO {
     private Double distanceKm;
     private Boolean potentialOverlap;
     private String relationType;
+    private Integer potentialDuplicateScore;
+    private java.util.List<String> evidenceList;
 
     public String getProjectId() { return projectId; }
     public void setProjectId(String projectId) { this.projectId = projectId; }
@@ -44,4 +46,8 @@ public class NearbyProjectDTO {
     public void setPotentialOverlap(Boolean potentialOverlap) { this.potentialOverlap = potentialOverlap; }
     public String getRelationType() { return relationType; }
     public void setRelationType(String relationType) { this.relationType = relationType; }
+    public Integer getPotentialDuplicateScore() { return potentialDuplicateScore; }
+    public void setPotentialDuplicateScore(Integer potentialDuplicateScore) { this.potentialDuplicateScore = potentialDuplicateScore; }
+    public java.util.List<String> getEvidenceList() { return evidenceList; }
+    public void setEvidenceList(java.util.List<String> evidenceList) { this.evidenceList = evidenceList; }
 }
