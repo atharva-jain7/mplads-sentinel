@@ -15,6 +15,10 @@ public class DashboardSummaryDTO {
     private Map<String, Long> statusDistribution;
     private List<Map<String, Object>> monthlyRiskTrend;
     private List<Map<String, Object>> priorityQueue;
+    private List<Map<String, Object>> sectorAnalytics;
+    private List<Map<String, Object>> agencyAnalytics;
+    private Map<String, Object> delaySpectrum;
+    private Map<String, Object> financialProgressDrift;
     private Double rupeesAtRisk;
     private Double totalSanctioned;
     private Double totalDisbursed;
@@ -44,6 +48,15 @@ public class DashboardSummaryDTO {
     public void setMonthlyRiskTrend(List<Map<String, Object>> monthlyRiskTrend) { this.monthlyRiskTrend = monthlyRiskTrend; }
     public List<Map<String, Object>> getPriorityQueue() { return priorityQueue; }
     public void setPriorityQueue(List<Map<String, Object>> priorityQueue) { this.priorityQueue = priorityQueue; }
+
+    public List<Map<String, Object>> getSectorAnalytics() { return sectorAnalytics; }
+    public void setSectorAnalytics(List<Map<String, Object>> sectorAnalytics) { this.sectorAnalytics = sectorAnalytics; }
+    public List<Map<String, Object>> getAgencyAnalytics() { return agencyAnalytics; }
+    public void setAgencyAnalytics(List<Map<String, Object>> agencyAnalytics) { this.agencyAnalytics = agencyAnalytics; }
+    public Map<String, Object> getDelaySpectrum() { return delaySpectrum; }
+    public void setDelaySpectrum(Map<String, Object> delaySpectrum) { this.delaySpectrum = delaySpectrum; }
+    public Map<String, Object> getFinancialProgressDrift() { return financialProgressDrift; }
+    public void setFinancialProgressDrift(Map<String, Object> financialProgressDrift) { this.financialProgressDrift = financialProgressDrift; }
 
     public Double getRupeesAtRisk() { return rupeesAtRisk; }
     public void setRupeesAtRisk(Double rupeesAtRisk) { this.rupeesAtRisk = rupeesAtRisk; }

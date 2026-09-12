@@ -33,6 +33,10 @@ import RiskTrendChart from '../components/RiskTrendChart';
 import GISMap from '../components/GISMap';
 import AssetCreationTracker from '../components/AssetCreationTracker';
 import EarlyWarningComplianceRadar from '../components/EarlyWarningComplianceRadar';
+import SectorExposureChart from '../components/SectorExposureChart';
+import ProgressSpendDisparityChart from '../components/ProgressSpendDisparityChart';
+import DelayAgingChart from '../components/DelayAgingChart';
+import AgencyPerformanceChart from '../components/AgencyPerformanceChart';
 
 const MP_CONSTITUENCY_DATA = [
   { mp: 'Smt. Supriya Sule', constituency: 'Pune / Baramati', district: 'Pune', state: 'Maharashtra' },
@@ -234,7 +238,72 @@ export default function DashboardPage() {
               riskLevel: 'HIGH',
               primaryFlag: '20% budget overrun & 180 days delay'
             }
-          ]
+          ],
+          sectorAnalytics: isPuneScope ? [
+            { sector: 'Community Infrastructure', projectCount: 28, sanctionedAmount: 8400000, expenditureAmount: 7100000, flaggedCount: 4, avgProgress: 68.2 },
+            { sector: 'Roads & Pathways', projectCount: 24, sanctionedAmount: 7200000, expenditureAmount: 6500000, flaggedCount: 3, avgProgress: 71.0 },
+            { sector: 'Education', projectCount: 18, sanctionedAmount: 5400000, expenditureAmount: 3900000, flaggedCount: 2, avgProgress: 64.5 },
+            { sector: 'Drinking Water', projectCount: 14, sanctionedAmount: 4200000, expenditureAmount: 3400000, flaggedCount: 2, avgProgress: 62.0 },
+            { sector: 'Sanitation', projectCount: 8, sanctionedAmount: 2400000, expenditureAmount: 2100000, flaggedCount: 1, avgProgress: 79.4 },
+            { sector: 'Health & Family Welfare', projectCount: 5, sanctionedAmount: 1500000, expenditureAmount: 1100000, flaggedCount: 1, avgProgress: 58.0 }
+          ] : [
+            { sector: 'Roads & Pathways', projectCount: 382, sanctionedAmount: 114500000, expenditureAmount: 92400000, flaggedCount: 68, avgProgress: 64.2 },
+            { sector: 'Community Infrastructure', projectCount: 294, sanctionedAmount: 88200000, expenditureAmount: 76500000, flaggedCount: 54, avgProgress: 68.5 },
+            { sector: 'Drinking Water', projectCount: 218, sanctionedAmount: 65400000, expenditureAmount: 51200000, flaggedCount: 42, avgProgress: 59.8 },
+            { sector: 'Education', projectCount: 164, sanctionedAmount: 49200000, expenditureAmount: 38100000, flaggedCount: 31, avgProgress: 72.1 },
+            { sector: 'Sanitation', projectCount: 98, sanctionedAmount: 29400000, expenditureAmount: 24600000, flaggedCount: 19, avgProgress: 66.4 },
+            { sector: 'Health & Family Welfare', projectCount: 54, sanctionedAmount: 18900000, expenditureAmount: 13200000, flaggedCount: 12, avgProgress: 58.1 },
+            { sector: 'Irrigation Facilities', projectCount: 40, sanctionedAmount: 14000000, expenditureAmount: 11800000, flaggedCount: 7, avgProgress: 75.0 }
+          ],
+          agencyAnalytics: isPuneScope ? [
+            { agency: 'Public Works Division - Central Pune', projectCount: 34, sanctionedAmount: 10200000, avgDelayDays: 32, flaggedCount: 4 },
+            { agency: 'Zilla Parishad Works Department', projectCount: 28, sanctionedAmount: 8400000, avgDelayDays: 21, flaggedCount: 3 },
+            { agency: 'Municipal Corporation Engineering Cell', projectCount: 22, sanctionedAmount: 6600000, avgDelayDays: 28, flaggedCount: 2 },
+            { agency: 'State Water Supply & Sewerage Board', projectCount: 13, sanctionedAmount: 3900000, avgDelayDays: 45, flaggedCount: 2 }
+          ] : [
+            { agency: 'Public Works Division - Infrastructure', projectCount: 312, sanctionedAmount: 93600000, avgDelayDays: 48, flaggedCount: 42 },
+            { agency: 'Municipal Corporation Engineering Cell', projectCount: 284, sanctionedAmount: 85200000, avgDelayDays: 36, flaggedCount: 38 },
+            { agency: 'Zilla Parishad Works Department', projectCount: 246, sanctionedAmount: 73800000, avgDelayDays: 24, flaggedCount: 26 },
+            { agency: 'State Water Supply & Sewerage Board', projectCount: 198, sanctionedAmount: 59400000, avgDelayDays: 52, flaggedCount: 34 },
+            { agency: 'Rural Development & Panchayat Raj Agency', projectCount: 142, sanctionedAmount: 42600000, avgDelayDays: 18, flaggedCount: 16 },
+            { agency: 'Minor Irrigation Project Division', projectCount: 68, sanctionedAmount: 20400000, avgDelayDays: 31, flaggedCount: 9 }
+          ],
+          delaySpectrum: isPuneScope ? {
+            onTrackCount: 57,
+            onTrackRupees: 17100000,
+            minorCount: 18,
+            minorRupees: 5400000,
+            moderateCount: 12,
+            moderateRupees: 3600000,
+            criticalCount: 6,
+            criticalRupees: 1800000,
+            severeCount: 4,
+            severeRupees: 1200000
+          } : {
+            onTrackCount: 742,
+            onTrackRupees: 184500000,
+            minorCount: 196,
+            minorRupees: 48200000,
+            moderateCount: 148,
+            moderateRupees: 36400000,
+            criticalCount: 94,
+            criticalRupees: 28900000,
+            severeCount: 70,
+            severeRupees: 21500000
+          },
+          financialProgressDrift: isPuneScope ? {
+            severeCount: 3,
+            severeRupeesAtRisk: 2600000,
+            moderateCount: 7,
+            alignedCount: 62,
+            aheadCount: 25
+          } : {
+            severeCount: 38,
+            severeRupeesAtRisk: 28400000,
+            moderateCount: 94,
+            alignedCount: 780,
+            aheadCount: 338
+          }
         });
       } finally {
         setLoading(false);
@@ -969,6 +1038,37 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Section: Operational Monitoring & Multi-Dimensional Intelligence (Extracted from Raw Data) */}
+          <div className="space-y-4 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200/80 gap-2">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-indigo-600" />
+                  Operational Monitoring & Scheme Intelligence
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Quantitative multi-dimensional telemetry extracted from field works, financial ledgers, and milestone progress
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                <span>Multi-Dimensional Telemetry</span>
+              </div>
+            </div>
+
+            {/* Row 1: Sector Capital Allocation & Spend vs Progress Disparity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SectorExposureChart sectorData={s.sectorAnalytics} />
+              <ProgressSpendDisparityChart driftData={s.financialProgressDrift} />
+            </div>
+
+            {/* Row 2: Timeline Delay Spectrum & Implementing Agency Saturation Index */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DelayAgingChart delayData={s.delaySpectrum} />
+              <AgencyPerformanceChart agencyData={s.agencyAnalytics} />
             </div>
           </div>
 

@@ -182,6 +182,128 @@ public class DashboardService {
         }
         summary.setPriorityQueue(queue);
 
+        // Sector Analytics Aggregation
+        Map<String, double[]> sectorStats = new LinkedHashMap<>(); // [0: count, 1: sanctioned, 2: expenditure, 3: criticalCount, 4: progressSum]
+        Map<String, double[]> agencyStats = new LinkedHashMap<>(); // [0: count, 1: sanctioned, 2: totalDelay, 3: criticalCount]
+
+        long delayOnTrack = 0, delayMinor = 0, delayModerate = 0, delayCritical = 0, delaySevere = 0;
+        double delayOnTrackRs = 0, delayMinorRs = 0, delayModerateRs = 0, delayCriticalRs = 0, delaySevereRs = 0;
+
+        long driftSevere = 0, driftModerate = 0, driftAligned = 0, driftAhead = 0;
+        double driftSevereRupees = 0;
+
+        for (Project p : pool) {
+            // Sector
+            String sec = (p.getProjectType() != null && !p.getProjectType().trim().isEmpty()) ? p.getProjectType().trim() : "Community Infrastructure";
+            double[] sArr = sectorStats.computeIfAbsent(sec, k -> new double[5]);
+            sArr[0] += 1;
+            if (p.getSanctionedAmount() != null) sArr[1] += p.getSanctionedAmount();
+            if (p.getExpenditureAmount() != null) sArr[2] += p.getExpenditureAmount();
+            String rl = p.getRiskLevel() != null ? p.getRiskLevel().toUpperCase() : "LOW";
+            if ("CRITICAL".equals(rl) || "HIGH".equals(rl)) sArr[3] += 1;
+            if (p.getProgressPercentage() != null) sArr[4] += p.getProgressPercentage();
+
+            // Agency
+            String ag = (p.getImplementingAgency() != null && !p.getImplementingAgency().trim().isEmpty()) ? p.getImplementingAgency().trim() : "Local Administrative Cell";
+            double[] aArr = agencyStats.computeIfAbsent(ag, k -> new double[4]);
+            aArr[0] += 1;
+            if (p.getSanctionedAmount() != null) aArr[1] += p.getSanctionedAmount();
+            if (p.getDelayDays() != null) aArr[2] += p.getDelayDays();
+            if ("CRITICAL".equals(rl) || "HIGH".equals(rl)) aArr[3] += 1;
+
+            // Delay Spectrum
+            int delay = p.getDelayDays() != null ? p.getDelayDays() : 0;
+            double cost = p.getSanctionedAmount() != null ? p.getSanctionedAmount() : 0.0;
+            if (delay <= 0) {
+                delayOnTrack++;
+                delayOnTrackRs += cost;
+            } else if (delay <= 30) {
+                delayMinor++;
+                delayMinorRs += cost;
+            } else if (delay <= 90) {
+                delayModerate++;
+                delayModerateRs += cost;
+            } else if (delay <= 180) {
+                delayCritical++;
+                delayCriticalRs += cost;
+            } else {
+                delaySevere++;
+                delaySevereRs += cost;
+            }
+
+            // Financial Spend vs Progress Drift
+            double util = p.getFundUtilizationPercent() != null ? p.getFundUtilizationPercent() : 0.0;
+            double prog = p.getProgressPercentage() != null ? p.getProgressPercentage() : 0.0;
+            double gap = util - prog;
+            if (gap > 25.0) {
+                driftSevere++;
+                if (p.getExpenditureAmount() != null) driftSevereRupees += p.getExpenditureAmount();
+            } else if (gap >= 10.0) {
+                driftModerate++;
+            } else if (gap >= -10.0) {
+                driftAligned++;
+            } else {
+                driftAhead++;
+            }
+        }
+
+        // Format Sector Analytics
+        List<Map<String, Object>> sectorList = new ArrayList<>();
+        sectorStats.entrySet().stream()
+            .sorted((a, b) -> Double.compare(b.getValue()[1], a.getValue()[1]))
+            .forEach(e -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                double[] v = e.getValue();
+                m.put("sector", e.getKey());
+                m.put("projectCount", (long) v[0]);
+                m.put("sanctionedAmount", Math.round(v[1] * 100.0) / 100.0);
+                m.put("expenditureAmount", Math.round(v[2] * 100.0) / 100.0);
+                m.put("flaggedCount", (long) v[3]);
+                m.put("avgProgress", v[0] > 0 ? Math.round((v[4] / v[0]) * 10.0) / 10.0 : 0.0);
+                sectorList.add(m);
+            });
+        summary.setSectorAnalytics(sectorList);
+
+        // Format Agency Analytics (top 6)
+        List<Map<String, Object>> agencyList = new ArrayList<>();
+        agencyStats.entrySet().stream()
+            .sorted((a, b) -> Double.compare(b.getValue()[1], a.getValue()[1]))
+            .limit(6)
+            .forEach(e -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                double[] v = e.getValue();
+                m.put("agency", e.getKey());
+                m.put("projectCount", (long) v[0]);
+                m.put("sanctionedAmount", Math.round(v[1] * 100.0) / 100.0);
+                m.put("avgDelayDays", v[0] > 0 ? Math.round(v[2] / v[0]) : 0);
+                m.put("flaggedCount", (long) v[3]);
+                agencyList.add(m);
+            });
+        summary.setAgencyAnalytics(agencyList);
+
+        // Format Delay Spectrum
+        Map<String, Object> delayMap = new LinkedHashMap<>();
+        delayMap.put("onTrackCount", delayOnTrack);
+        delayMap.put("onTrackRupees", Math.round(delayOnTrackRs));
+        delayMap.put("minorCount", delayMinor);
+        delayMap.put("minorRupees", Math.round(delayMinorRs));
+        delayMap.put("moderateCount", delayModerate);
+        delayMap.put("moderateRupees", Math.round(delayModerateRs));
+        delayMap.put("criticalCount", delayCritical);
+        delayMap.put("criticalRupees", Math.round(delayCriticalRs));
+        delayMap.put("severeCount", delaySevere);
+        delayMap.put("severeRupees", Math.round(delaySevereRs));
+        summary.setDelaySpectrum(delayMap);
+
+        // Format Financial-Physical Drift
+        Map<String, Object> driftMap = new LinkedHashMap<>();
+        driftMap.put("severeCount", driftSevere);
+        driftMap.put("severeRupeesAtRisk", Math.round(driftSevereRupees));
+        driftMap.put("moderateCount", driftModerate);
+        driftMap.put("alignedCount", driftAligned);
+        driftMap.put("aheadCount", driftAhead);
+        summary.setFinancialProgressDrift(driftMap);
+
         return summary;
     }
 }
