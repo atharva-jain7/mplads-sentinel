@@ -46,16 +46,20 @@ export default function ProjectListPage() {
   const [enrolledCases, setEnrolledCases] = useState(() => {
     try {
       const saved = localStorage.getItem('investigation_desk_cases');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch {
-      return [];
+      // fallback
     }
+    return [];
   });
   const [selectedProjectForDesk, setSelectedProjectForDesk] = useState(null);
   const [deskReason, setDeskReason] = useState('');
   const [deskToast, setDeskToast] = useState('');
 
-  const isEnrolledInDesk = (pid) => enrolledCases.some(c => c.projectId === pid);
+  const isEnrolledInDesk = (pid) => Array.isArray(enrolledCases) && enrolledCases.some(c => c && c.projectId === pid);
 
   const handleSendToDesk = () => {
     if (!selectedProjectForDesk) return;

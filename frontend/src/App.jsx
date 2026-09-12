@@ -10,6 +10,7 @@ import InvestigationDeskPage from './pages/InvestigationDeskPage';
 import ReportPage from './pages/ReportPage';
 import DataImportPage from './pages/DataImportPage';
 import LandingPage from './pages/LandingPage';
+import ErrorBoundary from './components/ErrorBoundary';
 import { authService } from './services/auth';
 
 function ProtectedLayout({ children }) {
@@ -23,7 +24,9 @@ function ProtectedLayout({ children }) {
       <div className="flex-1 flex">
         <Sidebar />
         <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>
@@ -32,8 +35,9 @@ function ProtectedLayout({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
         <Route path="/login" element={<LoginPage />} />
         
         {/* 1. Core Pillar: Executive Dashboard */}
@@ -128,5 +132,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  );
+  </ErrorBoundary>
+);
 }

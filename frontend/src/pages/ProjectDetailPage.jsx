@@ -41,17 +41,22 @@ export default function ProjectDetailPage() {
   const [enrolledCases, setEnrolledCases] = useState(() => {
     try {
       const saved = localStorage.getItem('investigation_desk_cases');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch {
-      return [];
+      // fallback
     }
+    return [];
   });
 
   const [showDeskModal, setShowDeskModal] = useState(false);
   const [deskReason, setDeskReason] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [error, setError] = useState(null);
 
-  const isEnrolled = enrolledCases.some(c => c.projectId === projectId);
+  const isEnrolled = Array.isArray(enrolledCases) && enrolledCases.some(c => c && c.projectId === projectId);
 
   useEffect(() => {
     loadData();
@@ -59,11 +64,14 @@ export default function ProjectDetailPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const p = await api.getProjectById(projectId);
+      if (!p) throw new Error(`Project ${projectId} not found`);
       setProject(p);
     } catch (err) {
-      console.warn('Project detail fallback:', err);
+      console.warn('Project detail fetch error:', err);
+      setError(err.message || 'Could not load project data');
     } finally {
       setLoading(false);
     }
@@ -87,7 +95,9 @@ export default function ProjectDetailPage() {
   const handleSendToDesk = () => {
     if (!project) return;
     try {
-      const current = JSON.parse(localStorage.getItem('investigation_desk_cases') || '[]');
+      const saved = localStorage.getItem('investigation_desk_cases');
+      const current = saved ? JSON.parse(saved) : [];
+      const currentList = Array.isArray(current) ? current : [];
       const newCase = {
         projectId: project.projectId,
         projectName: project.projectName,
@@ -116,7 +126,7 @@ export default function ProjectDetailPage() {
         ]
       };
 
-      const updated = [newCase, ...current.filter(c => c.projectId !== newCase.projectId)];
+      const updated = [newCase, ...currentList.filter(c => c.projectId !== newCase.projectId)];
       localStorage.setItem('investigation_desk_cases', JSON.stringify(updated));
       setEnrolledCases(updated);
       setShowDeskModal(false);
@@ -128,8 +138,40 @@ export default function ProjectDetailPage() {
     }
   };
 
-  if (loading || !project) {
-    return <div className="p-12 text-center text-slate-400 text-xs">Loading project profile...</div>;
+  if (loading) {
+    return (
+      <div className="p-16 text-center space-y-3 font-sans">
+        <div className="w-8 h-8 border-3 border-slate-200 border-t-slate-800 rounded-full animate-spin mx-auto" />
+        <div className="text-slate-600 text-xs font-medium">Loading project profile for {projectId}...</div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="max-w-md mx-auto my-16 p-8 bg-white border border-slate-200 rounded-2xl shadow-sm text-center space-y-4 font-sans">
+        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-200">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-slate-900">Project Profile Not Found</h2>
+          <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+            Could not retrieve data for project ID <b>{projectId}</b>. The record may not exist in the active database or may have been archived.
+          </p>
+          {error && (
+            <p className="text-[11px] font-mono text-slate-400 mt-2 bg-slate-50 p-2 rounded border border-slate-200">
+              {error}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => navigate('/projects')}
+          className="w-full px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+        >
+          Return to Project Risk Priority
+        </button>
+      </div>
+    );
   }
 
   const p = project;
@@ -366,24 +408,28 @@ export default function ProjectDetailPage() {
           level={analysisResult?.riskLevel || p.riskLevel}
           factors={analysisResult?.factors || [
             {
-              factor: 'Progress vs Expenditure Disparity',
-              contribution: 42,
-              detail: `Fund utilization is ${(p.fundUtilizationPercent || 86.7)}% while physical completion is only ${(p.progressPercentage || 38.0)}% (${(p.progressGap || 42)}% deficit).`
+              type: 'PROGRESS_EXPENDITURE_MISMATCH',
+              explanation: `Fund utilization is ${(p.fundUtilizationPercent || 86.7)}% while physical completion is only ${(p.progressPercentage || 38.0)}% (${(p.progressGap || 42)}% deficit).`,
+              score: 85,
+              severity: 'CRITICAL'
             },
             {
-              factor: 'Timeline Overrun & Execution Delay',
-              contribution: 30,
-              detail: `Project has exceeded target completion schedule by ${p.delayDays || 137} calendar days without formal time-extension endorsement.`
+              type: 'DELAY',
+              explanation: `Project has exceeded target completion schedule by ${p.delayDays || 137} calendar days without formal time-extension endorsement.`,
+              score: 80,
+              severity: 'HIGH'
             },
             {
-              factor: 'Contractor Workload Saturation',
-              contribution: 18,
-              detail: `Implementing agency ${p.implementingAgency || 'PWD'} has 4 overlapping concurrent assignments with the same contractor.`
+              type: 'LOF_PEER_ANOMALY',
+              explanation: `Implementing agency ${p.implementingAgency || 'PWD'} has 4 overlapping concurrent assignments with the same contractor.`,
+              score: 72,
+              severity: 'HIGH'
             },
             {
-              factor: 'GIS Spatial Proximity Check',
-              contribution: 10,
-              detail: 'Proximity screening verified within acceptable radius with no direct overlapping works recorded.'
+              type: 'POTENTIAL_DUPLICATE',
+              explanation: 'Proximity screening verified within acceptable radius with no direct overlapping works recorded.',
+              score: 35,
+              severity: 'LOW'
             }
           ]}
         />

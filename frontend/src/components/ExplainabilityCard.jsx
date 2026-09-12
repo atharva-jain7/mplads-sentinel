@@ -6,6 +6,7 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
   const getCleanCategory = (type) => {
+    if (!type) return 'MONITORING OBSERVATION';
     const map = {
       'ISOLATION_FOREST_ANOMALY': 'TIMELINE & BUDGET OUTLIER',
       'MULTIVARIATE_METRIC_OUTLIER': 'TIMELINE & BUDGET OUTLIER',
@@ -20,22 +21,43 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
       'POTENTIAL_DUPLICATE': 'GEOSPATIAL PROXIMITY',
       'COST_OVERRUN': 'BUDGET VARIANCE'
     };
-    return map[type] || type.replace(/_/g, ' ');
+    return map[type] || String(type).replace(/_/g, ' ');
   };
 
-  const hasFactors = factors && factors.length > 0;
+  const rawList = factors && Array.isArray(factors) && factors.length > 0 ? factors : [];
   const isLowRisk = (level === 'LOW' || (score !== undefined && score < 40));
-  const list = hasFactors ? factors : (isLowRisk ? [] : [
-    { type: 'PROGRESS_EXPENDITURE_MISMATCH', severity: 'HIGH', score: 85, explanation: 'Expenditure disbursed exceeds recorded physical progress milestones.' },
-    { type: 'DELAY', severity: 'HIGH', score: 82, explanation: 'Execution timeline has surpassed approved completion milestone.' }
-  ]);
 
-  // Derive dynamic factor contributions from actual observed signals
-  const delayFactor = list.find(f => f.type.includes('DELAY'));
-  const progressFactor = list.find(f => f.type.includes('PROGRESS') || f.type.includes('MISMATCH') || f.type.includes('MULTIVARIATE'));
-  const costFactor = list.find(f => f.type.includes('COST') || f.type.includes('BUDGET'));
-  const dupFactor = list.find(f => f.type.includes('DUPLICATE') || f.type.includes('REPEATED'));
-  const lofFactor = list.find(f => f.type.includes('PEER') || f.type.includes('LOF') || f.type.includes('BENFORD'));
+  // Normalize all factors so both {type, explanation} and {factor, detail, contribution} format work
+  const list = rawList.length > 0 
+    ? rawList.map(f => ({
+        type: f.type || f.factor || 'ANOMALY_SIGNAL',
+        explanation: f.explanation || f.detail || f.factor || 'Anomaly observation flagged during automated screening.',
+        score: f.score || f.contribution || 75,
+        severity: f.severity || (score >= 80 ? 'CRITICAL' : score >= 60 ? 'HIGH' : 'MEDIUM')
+      }))
+    : (isLowRisk ? [] : [
+        { type: 'PROGRESS_EXPENDITURE_MISMATCH', severity: 'HIGH', score: 85, explanation: 'Expenditure disbursed exceeds recorded physical progress milestones.' },
+        { type: 'DELAY', severity: 'HIGH', score: 82, explanation: 'Execution timeline has surpassed approved completion milestone.' }
+      ]);
+
+  // Derive dynamic factor contributions from actual observed signals safely
+  const delayFactor = list.find(f => (f.type || '').toUpperCase().includes('DELAY'));
+  const progressFactor = list.find(f => {
+    const t = (f.type || '').toUpperCase();
+    return t.includes('PROGRESS') || t.includes('MISMATCH') || t.includes('MULTIVARIATE');
+  });
+  const costFactor = list.find(f => {
+    const t = (f.type || '').toUpperCase();
+    return t.includes('COST') || t.includes('BUDGET');
+  });
+  const dupFactor = list.find(f => {
+    const t = (f.type || '').toUpperCase();
+    return t.includes('DUPLICATE') || t.includes('REPEATED');
+  });
+  const lofFactor = list.find(f => {
+    const t = (f.type || '').toUpperCase();
+    return t.includes('PEER') || t.includes('LOF') || t.includes('BENFORD');
+  });
 
   const delayPts = delayFactor ? Math.min(30, Math.round((delayFactor.score || 70) * 0.3)) : 0;
   const progressPts = progressFactor ? Math.min(35, Math.round((progressFactor.score || 75) * 0.35)) : 0;
