@@ -85,26 +85,30 @@ public class RuleEngineService {
         long repeatedCount = relatedProjects != null ? relatedProjects.stream()
                 .filter(rp -> "REPEATED_FUNDING".equalsIgnoreCase(rp.getRelationshipType()) ||
                               "POTENTIAL_OVERLAP".equalsIgnoreCase(rp.getRelationshipType())).count() : 0;
-        if (repeatedCount > 0 || "MPL-10482".equals(project.getProjectId()) || "MPL-7721".equals(project.getProjectId())) {
-            long count = Math.max(repeatedCount, "MPL-10482".equals(project.getProjectId()) ? 2 : 1);
+        if (repeatedCount > 0) {
             signals.add(new RiskFactorDTO(
                 "REPEATED_FUNDING",
                 "HIGH",
                 80,
-                String.format("%d previous related funding projects identified at this location/category", count)
+                String.format("%d previous related funding projects identified at this location/category", repeatedCount)
             ));
         }
 
         // RULE 7: Potential Duplicate
-        boolean hasDuplicate = relatedProjects != null && relatedProjects.stream()
-                .anyMatch(rp -> rp.getDistanceKm() != null && rp.getDistanceKm() <= 1.0);
-        if (hasDuplicate || "MPL-10482".equals(project.getProjectId()) || "MPL-6651".equals(project.getProjectId())) {
-            signals.add(new RiskFactorDTO(
-                "POTENTIAL_DUPLICATE",
-                "MEDIUM",
-                75,
-                "Similar project found within close spatial proximity (1.0 km) - potential overlap review recommended"
-            ));
+        if (relatedProjects != null) {
+            RelatedProject nearestDuplicate = relatedProjects.stream()
+                    .filter(rp -> rp.getDistanceKm() != null && rp.getDistanceKm() <= 1.0)
+                    .findFirst().orElse(null);
+            if (nearestDuplicate != null) {
+                String overlapId = nearestDuplicate.getRelatedProjectId() != null ? nearestDuplicate.getRelatedProjectId() : "nearby work";
+                signals.add(new RiskFactorDTO(
+                    "POTENTIAL_DUPLICATE",
+                    "MEDIUM",
+                    75,
+                    String.format("Similar project (%s) found within close spatial proximity (%.1f km) - potential overlap review recommended",
+                            overlapId, nearestDuplicate.getDistanceKm())
+                ));
+            }
         }
 
         return signals;

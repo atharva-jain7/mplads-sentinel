@@ -152,25 +152,30 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const queryParams = {};
-        if (isMP || isDistrict) {
-          queryParams.district = 'Pune';
-        } else if (isState) {
-          queryParams.state = 'Maharashtra';
-        } else if (selectedDistrict) {
+        if (selectedDistrict) {
           queryParams.district = selectedDistrict;
         } else if (selectedState) {
           queryParams.state = selectedState;
+        } else if (isMP || isDistrict) {
+          queryParams.district = 'Pune';
+        } else if (isState) {
+          queryParams.state = 'Maharashtra';
         }
 
         const res = await api.getDashboardSummary(queryParams);
         setSummary(res);
         try {
-          const pRes = await api.getProjects({
-            district: queryParams.district || 'Pune',
+          const projectParams = {
             size: 15,
             sortBy: 'riskScore',
             sortDirection: 'desc'
-          });
+          };
+          if (queryParams.district) {
+            projectParams.district = queryParams.district;
+          } else if (queryParams.state) {
+            projectParams.state = queryParams.state;
+          }
+          const pRes = await api.getProjects(projectParams);
           if (pRes && pRes.content && pRes.content.length > 0) {
             setConstituencyWorks(pRes.content);
           }

@@ -43,6 +43,7 @@ public class NearbyProjectDTO {
     public Double getDistanceKm() { return distanceKm; }
     public void setDistanceKm(Double distanceKm) { this.distanceKm = distanceKm; }
     public Boolean getPotentialOverlap() { return potentialOverlap; }
+    public Boolean isPotentialOverlap() { return potentialOverlap; }
     public void setPotentialOverlap(Boolean potentialOverlap) { this.potentialOverlap = potentialOverlap; }
     public String getRelationType() { return relationType; }
     public void setRelationType(String relationType) { this.relationType = relationType; }

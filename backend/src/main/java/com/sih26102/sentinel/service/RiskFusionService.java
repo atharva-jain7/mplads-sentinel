@@ -34,15 +34,6 @@ public class RiskFusionService {
         int histScore = hasRepeatedFunding ? 85 : 15;
         int gisScore = hasDuplicate ? 80 : 15;
 
-        if ("MPL-10482".equals(project.getProjectId())) {
-            ruleScore = Math.max(ruleScore, 90);
-            ifScore = Math.max(ifScore, 88);
-            lofScore = Math.max(lofScore, 89);
-            benfordScore = Math.max(benfordScore, 85);
-            histScore = 90;
-            gisScore = 85;
-        }
-
         double composite = (ruleScore * 0.35) +
                            (ifScore * 0.20) +
                            (lofScore * 0.15) +

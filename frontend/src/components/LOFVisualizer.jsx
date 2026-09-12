@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Compass, Info, Layers, CheckCircle2, AlertTriangle, ArrowUpRight } from 'lucide-react';
 
-export default function LOFVisualizer({ lofData, targetProject }) {
+export default function LOFVisualizer({ lofData, targetProject, district, sector }) {
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   const defaultScatter = [
@@ -34,12 +34,22 @@ export default function LOFVisualizer({ lofData, targetProject }) {
   ];
 
   const data = lofData || {};
-  const rawLof = data.rawLof || 2.49;
-  const lofScore = data.lofScore || 86;
+  const rawLof = data.rawLof ?? 1.08;
+  const isOutlier = data.isAnomaly ?? (rawLof > 1.25);
+  const lofScore = data.lofScore ?? (isOutlier ? 84 : 22);
   const peerCount = data.peerCount || 25;
-  const kDistance = data.kDistance || 7.304;
-  const lrd = data.lrd || 0.154;
-  const points = data.peerScatter && data.peerScatter.length > 0 ? data.peerScatter : defaultScatter;
+  const kDistance = data.kDistance || 5.12;
+  const lrd = data.lrd || 0.28;
+
+  const points = (data.peerScatter && data.peerScatter.length > 0)
+    ? data.peerScatter
+    : defaultScatter.map(pt => (pt.isTarget && targetProject) ? {
+        ...pt,
+        id: targetProject.projectId || pt.id,
+        progress: targetProject.progressPercentage ?? pt.progress,
+        utilization: targetProject.fundUtilizationPercent ?? pt.utilization,
+        lof: rawLof
+      } : pt);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
@@ -60,11 +70,13 @@ export default function LOFVisualizer({ lofData, targetProject }) {
         <div className="flex items-center gap-3">
           <div className="text-right">
             <span className="text-[10px] text-slate-400 block uppercase font-medium">LOF Factor</span>
-            <span className="text-lg font-bold font-mono text-red-600">{rawLof} <span className="text-xs text-slate-400 font-normal">(&gt; 1.0 indicates outlier)</span></span>
+            <span className={`text-lg font-bold font-mono ${isOutlier ? 'text-red-600' : 'text-emerald-600'}`}>
+              {rawLof} <span className="text-xs text-slate-400 font-normal">({isOutlier ? '> 1.2 outlier' : 'normal density'})</span>
+            </span>
           </div>
-          <div className="px-2.5 py-1 bg-red-50 border border-red-200 rounded-md text-right">
-            <span className="text-[10px] text-red-600 block uppercase font-medium">Model Score</span>
-            <span className="text-sm font-bold font-mono text-red-700">{lofScore} / 100</span>
+          <div className={`px-2.5 py-1 border rounded-md text-right ${isOutlier ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
+            <span className={`text-[10px] block uppercase font-medium ${isOutlier ? 'text-red-600' : 'text-emerald-700'}`}>Model Score</span>
+            <span className={`text-sm font-bold font-mono ${isOutlier ? 'text-red-700' : 'text-emerald-800'}`}>{lofScore} / 100</span>
           </div>
         </div>
       </div>
@@ -76,7 +88,7 @@ export default function LOFVisualizer({ lofData, targetProject }) {
           <span>How LOF Evaluates Local Cluster Density:</span>
         </div>
         <p className="text-[11px] leading-relaxed text-slate-600">
-          Unlike global anomaly detectors, <b>Local Outlier Factor (LOF)</b> computes the local density of a project relative to its <i>k</i>-nearest neighbors ({peerCount} similar community works in Pune). 
+          Unlike global anomaly detectors, <b>Local Outlier Factor (LOF)</b> computes the local density of a project relative to its <i>k</i>-nearest neighbors ({peerCount} similar {sector || 'works'} in {district || 'the district'}). 
           A project with an LOF ratio significantly higher than 1.0 indicates that its density is substantially sparser than its peers due to an abnormal combination of <b>high expenditure velocity</b> with <b>lagging milestone progress</b>.
         </p>
         <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-[11px] text-slate-600">

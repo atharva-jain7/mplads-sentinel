@@ -23,17 +23,25 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
     return map[type] || type.replace(/_/g, ' ');
   };
 
-  const defaultFactors = [
-    { type: 'PROGRESS_EXPENDITURE_MISMATCH', severity: 'HIGH', score: 88, explanation: '86.7% expenditure disbursed against 38.0% physical completion on site (48.7% progress-spend gap).' },
-    { type: 'DELAY', severity: 'HIGH', score: 85, explanation: 'Project is 137 days overdue past official target completion milestone.' },
-    { type: 'MULTIVARIATE_METRIC_OUTLIER', severity: 'HIGH', score: 89, explanation: 'Simultaneous lag across milestone progress (42.0% gap), timeline duration, and disbursement velocity.' },
-    { type: 'PEER_GROUP_DEVIATION', severity: 'HIGH', score: 86, explanation: 'Cost per physical progress unit is 2.3x higher than local peer community works in Pune.' },
-    { type: 'PAYMENT_DIGIT_IRREGULARITY', severity: 'MEDIUM', score: 72, explanation: 'Unusual financial voucher first-digit distribution across 12 payment tranches - audit review recommended.' },
-    { type: 'REPEATED_FUNDING', severity: 'HIGH', score: 80, explanation: '2 historical works identified under same category and location in previous fiscal years.' },
-    { type: 'POTENTIAL_DUPLICATE', severity: 'MEDIUM', score: 75, explanation: 'Similar project (MPL-9812) located within 0.8 km radius - spatial overlap review recommended.' }
-  ];
+  const hasFactors = factors && factors.length > 0;
+  const isLowRisk = (level === 'LOW' || (score !== undefined && score < 40));
+  const list = hasFactors ? factors : (isLowRisk ? [] : [
+    { type: 'PROGRESS_EXPENDITURE_MISMATCH', severity: 'HIGH', score: 85, explanation: 'Expenditure disbursed exceeds recorded physical progress milestones.' },
+    { type: 'DELAY', severity: 'HIGH', score: 82, explanation: 'Execution timeline has surpassed approved completion milestone.' }
+  ]);
 
-  const list = factors.length > 0 ? factors : defaultFactors;
+  // Derive dynamic factor contributions from actual observed signals
+  const delayFactor = list.find(f => f.type.includes('DELAY'));
+  const progressFactor = list.find(f => f.type.includes('PROGRESS') || f.type.includes('MISMATCH') || f.type.includes('MULTIVARIATE'));
+  const costFactor = list.find(f => f.type.includes('COST') || f.type.includes('BUDGET'));
+  const dupFactor = list.find(f => f.type.includes('DUPLICATE') || f.type.includes('REPEATED'));
+  const lofFactor = list.find(f => f.type.includes('PEER') || f.type.includes('LOF') || f.type.includes('BENFORD'));
+
+  const delayPts = delayFactor ? Math.min(30, Math.round((delayFactor.score || 70) * 0.3)) : 0;
+  const progressPts = progressFactor ? Math.min(35, Math.round((progressFactor.score || 75) * 0.35)) : 0;
+  const costPts = costFactor ? Math.min(20, Math.round((costFactor.score || 60) * 0.2)) : 0;
+  const dupPts = dupFactor ? Math.min(20, Math.round((dupFactor.score || 65) * 0.2)) : 0;
+  const lofPts = lofFactor ? Math.min(15, Math.round((lofFactor.score || 60) * 0.15)) : 0;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
@@ -45,9 +53,9 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
         <div className="flex items-center gap-3">
           <div className="text-right">
             <span className="text-[10px] text-slate-400 block uppercase font-medium">Composite Risk Score</span>
-            <span className="text-xl font-bold font-mono text-slate-900">{score || 88} <span className="text-xs text-slate-400 font-normal">/ 100</span></span>
+            <span className="text-xl font-bold font-mono text-slate-900">{score ?? 45} <span className="text-xs text-slate-400 font-normal">/ 100</span></span>
           </div>
-          <RiskBadge level={level || 'CRITICAL'} />
+          <RiskBadge level={level || (score >= 80 ? 'CRITICAL' : score >= 60 ? 'HIGH' : score >= 30 ? 'MEDIUM' : 'LOW')} />
         </div>
       </div>
 
@@ -65,23 +73,23 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono">
           <div className="bg-white p-2 rounded-lg border border-slate-200">
             <span className="text-[10px] text-slate-400 font-sans block truncate">Schedule Delay</span>
-            <span className="text-sm font-bold text-red-600">+22 pts</span>
+            <span className={`text-sm font-bold ${delayPts > 0 ? 'text-red-600' : 'text-slate-400'}`}>+{delayPts} pts</span>
           </div>
           <div className="bg-white p-2 rounded-lg border border-slate-200">
             <span className="text-[10px] text-slate-400 font-sans block truncate">Progress Mismatch</span>
-            <span className="text-sm font-bold text-red-600">+25 pts</span>
+            <span className={`text-sm font-bold ${progressPts > 0 ? 'text-red-600' : 'text-slate-400'}`}>+{progressPts} pts</span>
           </div>
           <div className="bg-white p-2 rounded-lg border border-slate-200">
             <span className="text-[10px] text-slate-400 font-sans block truncate">Cost Anomaly</span>
-            <span className="text-sm font-bold text-orange-600">+18 pts</span>
+            <span className={`text-sm font-bold ${costPts > 0 ? 'text-orange-600' : 'text-slate-400'}`}>+{costPts} pts</span>
           </div>
           <div className="bg-white p-2 rounded-lg border border-slate-200">
             <span className="text-[10px] text-slate-400 font-sans block truncate">Duplicate Prob.</span>
-            <span className="text-sm font-bold text-amber-600">+15 pts</span>
+            <span className={`text-sm font-bold ${dupPts > 0 ? 'text-amber-600' : 'text-slate-400'}`}>+{dupPts} pts</span>
           </div>
           <div className="bg-white p-2 rounded-lg border border-slate-200">
             <span className="text-[10px] text-slate-400 font-sans block truncate">Compliance / LOF</span>
-            <span className="text-sm font-bold text-slate-700">+{Math.max(8, (score || 88) - 80)} pts</span>
+            <span className={`text-sm font-bold ${lofPts > 0 ? 'text-indigo-600' : 'text-slate-400'}`}>+{lofPts} pts</span>
           </div>
         </div>
 
@@ -98,11 +106,23 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
       </div>
 
       <div className="mt-4">
-        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-          Flagged Observations ({list.length}):
-        </p>
+        {list.length === 0 ? (
+          <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-900">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div>
+              <h4 className="text-xs font-bold text-emerald-950">Normal Operational Parameters</h4>
+              <p className="text-xs text-emerald-800 mt-0.5">
+                No high-risk anomaly triggers detected. Physical progress, expenditure disbursements, and peer benchmarks conform to standard guidelines.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+              Flagged Observations ({list.length}):
+            </p>
 
-        <div className="space-y-2">
+            <div className="space-y-2">
           {list.map((factor, index) => {
             const isExpanded = expandedIndex === index;
             const category = getCleanCategory(factor.type);
@@ -155,6 +175,8 @@ export default function ExplainabilityCard({ score, level, factors = [] }) {
             );
           })}
         </div>
+          </>
+        )}
       </div>
     </div>
   );

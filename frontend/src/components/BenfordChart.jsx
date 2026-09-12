@@ -1,30 +1,38 @@
 import React from 'react';
 
-export default function BenfordChart({ distribution, isAnomaly, deviationScore }) {
+export default function BenfordChart({ distribution, isAnomaly, deviationScore, benfordResult }) {
   const defaultDist = [
-    { digit: 1, expected: 30.1, observed: 8.3 },
-    { digit: 2, expected: 17.6, observed: 58.3 },
-    { digit: 3, expected: 12.5, observed: 0.0 },
-    { digit: 4, expected: 9.7, observed: 0.0 },
-    { digit: 5, expected: 7.9, observed: 16.7 },
-    { digit: 6, expected: 6.7, observed: 0.0 },
-    { digit: 7, expected: 5.8, observed: 0.0 },
-    { digit: 8, expected: 5.1, observed: 8.3 },
-    { digit: 9, expected: 4.6, observed: 8.3 }
+    { digit: 1, expected: 30.1, observed: 28.5 },
+    { digit: 2, expected: 17.6, observed: 18.2 },
+    { digit: 3, expected: 12.5, observed: 13.0 },
+    { digit: 4, expected: 9.7, observed: 10.1 },
+    { digit: 5, expected: 7.9, observed: 8.0 },
+    { digit: 6, expected: 6.7, observed: 6.5 },
+    { digit: 7, expected: 5.8, observed: 6.0 },
+    { digit: 8, expected: 5.1, observed: 5.0 },
+    { digit: 9, expected: 4.6, observed: 4.7 }
   ];
 
-  const digits = distribution || defaultDist;
+  const digits = distribution || benfordResult?.distribution || benfordResult?.digitsDistribution || defaultDist;
+  const score = deviationScore ?? benfordResult?.deviationScore ?? 22;
+  const anomaly = isAnomaly ?? benfordResult?.isAnomaly ?? (score >= 60);
 
   return (
     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
         <div>
-          <h4 className="text-sm font-bold text-slate-900">Financial Digit Pattern Anomaly (Benford's Law Screening)</h4>
-          <p className="text-xs text-slate-500">Payment values show an unusual first-digit distribution relative to the reference dataset. This is a screening signal requiring financial verification.</p>
+          <h4 className="text-sm font-bold text-slate-900">Financial Digit Pattern (Benford's Law Screening)</h4>
+          <p className="text-xs text-slate-500">
+            {anomaly
+              ? "Payment values show an unusual first-digit distribution relative to the logarithmic reference baseline. Verification recommended."
+              : "Disbursement payment voucher first-digits conform reasonably to the logarithmic reference curve."}
+          </p>
         </div>
         <div className="text-right shrink-0">
-          <span className="text-xs text-slate-400">Signal Deviation:</span>
-          <span className="ml-1 font-mono font-bold text-slate-800">{deviationScore || 72}/100</span>
+          <span className="text-xs text-slate-400">Deviation Score:</span>
+          <span className={`ml-1 font-mono font-bold ${anomaly ? 'text-amber-600' : 'text-emerald-700'}`}>
+            {score}/100
+          </span>
         </div>
       </div>
 

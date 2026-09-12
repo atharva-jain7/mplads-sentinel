@@ -261,7 +261,7 @@ export default function InvestigationPage() {
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Sanctioned</span>
           <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
-            ₹{((p.sanctionedAmount || 3000000) / 100000).toFixed(2)} Lakhs
+            ₹{((p.sanctionedAmount ?? 3000000) / 100000).toFixed(2)} Lakhs
           </div>
           <span className="text-[11px] text-slate-500">Approved Budget</span>
         </div>
@@ -269,28 +269,28 @@ export default function InvestigationPage() {
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Expenditure</span>
           <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
-            ₹{((p.expenditureAmount || 2600000) / 100000).toFixed(2)} Lakhs
+            ₹{((p.expenditureAmount ?? 0) / 100000).toFixed(2)} Lakhs
           </div>
           <span className="text-[11px] text-rose-700 font-semibold font-mono">
-            {p.fundUtilizationPercent || ((p.expenditureAmount / (p.sanctionedAmount || 1)) * 100).toFixed(1)}% disbursed
+            {p.fundUtilizationPercent ?? ((p.expenditureAmount / (p.sanctionedAmount || 1)) * 100).toFixed(1)}% disbursed
           </span>
         </div>
 
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Progress</span>
           <div className="text-base font-bold font-mono text-slate-900 mt-0.5 flex items-baseline gap-1.5">
-            <span>{p.progressPercentage || 38}%</span>
-            <span className="text-xs font-normal text-slate-400">/ {p.expectedProgressPercentage || 80}% target</span>
+            <span>{p.progressPercentage ?? 0}%</span>
+            <span className="text-xs font-normal text-slate-400">/ {p.expectedProgressPercentage ?? 100}% target</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1 mt-1">
-            <div className="bg-slate-700 h-1 rounded-full" style={{ width: `${p.progressPercentage || 38}%` }} />
+            <div className="bg-slate-700 h-1 rounded-full" style={{ width: `${p.progressPercentage ?? 0}%` }} />
           </div>
         </div>
 
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Delay</span>
           <div className="text-base font-bold font-mono text-slate-900 mt-0.5">
-            {p.delayDays > 0 ? (
+            {(p.delayDays ?? 0) > 0 ? (
               <span className="text-rose-700 font-bold">{p.delayDays} Days Lag</span>
             ) : (
               <span className="text-emerald-700 font-semibold">On Schedule</span>
@@ -305,20 +305,20 @@ export default function InvestigationPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <div className="text-2xl font-black font-mono text-slate-900">
-              {analysis?.riskScore || p.riskScore || 88} <span className="text-xs font-normal text-slate-400">/ 100</span>
+              {analysis?.riskScore ?? p.riskScore ?? 50} <span className="text-xs font-normal text-slate-400">/ 100</span>
             </div>
             <div className="h-6 w-px bg-slate-200" />
-            <RiskBadge level={analysis?.riskLevel || p.riskLevel || 'CRITICAL'} score={analysis?.riskScore || p.riskScore || 88} />
+            <RiskBadge level={analysis?.riskLevel ?? p.riskLevel ?? 'LOW'} score={analysis?.riskScore ?? p.riskScore ?? 50} />
             <span className="text-xs text-slate-500">Composite Multi-Signal Score</span>
           </div>
           <div className="text-xs text-slate-600">
-            Major Indicators: <span className="font-semibold text-rose-700">Milestone Gap ({p.progressGap || 48.7}%)</span> • <span className="font-semibold text-amber-700">Schedule Lag ({p.delayDays || 137}d)</span> • <span className="font-semibold text-blue-700">Disbursement Outflow</span>
+            Major Indicators: <span className="font-semibold text-rose-700">Milestone Gap ({p.progressGap ?? 0}%)</span> • <span className="font-semibold text-amber-700">Schedule Lag ({p.delayDays ?? 0}d)</span> • <span className="font-semibold text-blue-700">Disbursement Outflow ({p.fundUtilizationPercent ?? 0}%)</span>
           </div>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
           <div
-            className={`h-2 rounded-full ${(analysis?.riskScore || p.riskScore || 88) >= 80 ? 'bg-rose-600' : (analysis?.riskScore || p.riskScore || 88) >= 60 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-            style={{ width: `${Math.min(100, analysis?.riskScore || p.riskScore || 88)}%` }}
+            className={`h-2 rounded-full ${(analysis?.riskScore ?? p.riskScore ?? 50) >= 80 ? 'bg-rose-600' : (analysis?.riskScore ?? p.riskScore ?? 50) >= 60 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+            style={{ width: `${Math.min(100, analysis?.riskScore ?? p.riskScore ?? 50)}%` }}
           />
         </div>
       </div>
@@ -454,7 +454,7 @@ export default function InvestigationPage() {
                 <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
                 <div>
                   <span className="font-bold text-red-900 text-xs">Progress–Spend Mismatch</span>
-                  <span className="text-red-700 text-[11px] ml-2 font-mono">Disbursed {p.fundUtilizationPercent || 86.7}% vs Physical {p.progressPercentage || 38.0}% (Gap: -{p.progressGap || 48.7}%)</span>
+                  <span className="text-red-700 text-[11px] ml-2 font-mono">Disbursed {p.fundUtilizationPercent ?? 0}% vs Physical {p.progressPercentage ?? 0}% (Gap: -{p.progressGap ?? 0}%)</span>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 text-red-700">
@@ -465,13 +465,14 @@ export default function InvestigationPage() {
             {expandedCards.mismatch && (
               <div className="p-4 bg-white border-t border-red-100 space-y-2">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <div><span className="text-slate-500 block text-[10px]">Physical Progress:</span><b>{p.progressPercentage || 38.0}%</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Funds Disbursed:</span><b className="text-red-700">{p.fundUtilizationPercent || 86.7}%</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Expected Progress:</span><b>{p.expectedProgressPercentage || 80.0}%</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Net Gap:</span><b className="text-red-700">-{p.progressGap || 48.7}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Physical Progress:</span><b>{p.progressPercentage ?? 0}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Funds Disbursed:</span><b className="text-red-700">{p.fundUtilizationPercent ?? 0}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Expected Progress:</span><b>{p.expectedProgressPercentage ?? 100}%</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Net Gap:</span><b className="text-red-700">-{p.progressGap ?? 0}%</b></div>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
-                  86.7% of public funds were disbursed from the treasury while only 38% of civil construction has been executed on-site. The contractor has drawn down mobilization and progress payments ahead of physical inspection milestones.
+                  {p.fundUtilizationPercent ?? 0}% of public funds were disbursed from the treasury while {p.progressPercentage ?? 0}% of civil construction has been executed on-site.
+                  {(p.progressGap ?? 0) > 15 ? ' The contractor has drawn down mobilization and progress payments ahead of physical inspection milestones.' : ' Disbursement outflow tracks physical progress milestones.'}
                 </p>
               </div>
             )}
@@ -487,7 +488,7 @@ export default function InvestigationPage() {
                 <DollarSign className="w-4 h-4 text-orange-600 shrink-0" />
                 <div>
                   <span className="font-bold text-orange-900 text-xs">Cost Rate Anomaly</span>
-                  <span className="text-orange-800 text-[11px] ml-2 font-mono">Sanctioned: ₹{((p.sanctionedAmount || 3000000) / 100000).toFixed(1)}L • Peer Benchmark: ₹{((p.estimatedCost || 2400000) / 100000).toFixed(1)}L</span>
+                  <span className="text-orange-800 text-[11px] ml-2 font-mono">Sanctioned: ₹{((p.sanctionedAmount ?? 3000000) / 100000).toFixed(1)}L • Estimated: ₹{((p.estimatedCost ?? p.sanctionedAmount ?? 3000000) / 100000).toFixed(1)}L</span>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 text-orange-700">
@@ -498,13 +499,13 @@ export default function InvestigationPage() {
             {expandedCards.cost && (
               <div className="p-4 bg-white border-t border-orange-100 space-y-2">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <div><span className="text-slate-500 block text-[10px]">Sanctioned Budget:</span><b>₹{(p.sanctionedAmount || 3000000).toLocaleString('en-IN')}</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Disbursed Outflow:</span><b>₹{(p.expenditureAmount || 2600000).toLocaleString('en-IN')}</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Peer Benchmark:</span><b>₹{(p.estimatedCost || 2400000).toLocaleString('en-IN')}</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Variance vs Peer:</span><b className="text-orange-700">+₹{Math.max(0, (p.expenditureAmount || 2600000) - (p.estimatedCost || 2400000)).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Sanctioned Budget:</span><b>₹{(p.sanctionedAmount ?? 0).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Disbursed Outflow:</span><b>₹{(p.expenditureAmount ?? 0).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Estimated Cost:</span><b>₹{(p.estimatedCost ?? p.sanctionedAmount ?? 0).toLocaleString('en-IN')}</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Cost Variance:</span><b className="text-orange-700">₹{Math.max(0, (p.expenditureAmount ?? 0) - (p.estimatedCost ?? p.sanctionedAmount ?? 0)).toLocaleString('en-IN')}</b></div>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
-                  Unit rates estimated for civil masonry and concrete are 2.3x higher than similar works completed in {p.district || 'Pune'} district over the last 24 months. Itemized measurement book validation is warranted.
+                  Financial rate analysis for civil masonry and concrete executed in {p.district || 'the jurisdiction'}. Measurement book entries should be verified against sanctioned schedule of rates (SoR).
                 </p>
               </div>
             )}
@@ -520,7 +521,7 @@ export default function InvestigationPage() {
                 <Clock className="w-4 h-4 text-amber-600 shrink-0" />
                 <div>
                   <span className="font-bold text-amber-900 text-xs">Schedule Delay & Timeline Slippage</span>
-                  <span className="text-amber-800 text-[11px] ml-2 font-mono">{p.delayDays || 137} days overdue beyond approved deadline</span>
+                  <span className="text-amber-800 text-[11px] ml-2 font-mono">{(p.delayDays ?? 0) > 0 ? `${p.delayDays} days overdue beyond approved deadline` : 'On schedule'}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 text-amber-700">
@@ -533,10 +534,12 @@ export default function InvestigationPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs p-3 bg-slate-50 rounded-lg border border-slate-200">
                   <div><span className="text-slate-500 block text-[10px]">Sanction Date:</span><b>{p.sanctionDate || '2025-01-15'}</b></div>
                   <div><span className="text-slate-500 block text-[10px]">Original Deadline:</span><b>{p.expectedCompletionDate || '2025-10-31'}</b></div>
-                  <div><span className="text-slate-500 block text-[10px]">Recorded Lag:</span><b className="text-rose-700">{p.delayDays || 137} Days</b></div>
+                  <div><span className="text-slate-500 block text-[10px]">Recorded Lag:</span><b className="text-rose-700">{p.delayDays ?? 0} Days</b></div>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed font-sans pt-1">
-                  Civil execution has exceeded the sanctioned completion timeframe by over 4 months. No formal extension approval or force majeure endorsement was detected in district administrative records.
+                  {(p.delayDays ?? 0) > 0
+                    ? `Civil execution has exceeded the sanctioned completion timeframe by ${p.delayDays} days. Verification of extension approval or time variance endorsement recommended.`
+                    : 'Milestone progress timeline is on track within the approved execution schedule.'}
                 </p>
               </div>
             )}

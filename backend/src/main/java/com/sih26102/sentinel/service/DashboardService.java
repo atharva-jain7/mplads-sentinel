@@ -168,6 +168,7 @@ public class DashboardService {
             Map<String, Object> item = new HashMap<>();
             item.put("projectId", p.getProjectId());
             item.put("projectName", p.getProjectName());
+            item.put("projectType", p.getProjectType());
             item.put("district", p.getDistrict());
             item.put("state", p.getState());
             item.put("sanctionedAmount", p.getSanctionedAmount());
