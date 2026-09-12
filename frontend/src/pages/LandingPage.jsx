@@ -28,6 +28,8 @@ import {
   ChevronRight,
   BookOpen
 } from 'lucide-react';
+import LiveDemoVideoPlayer from '../components/LiveDemoVideoPlayer';
+
 
 // Background images for the rotating hero slideshow
 const HERO_BACKGROUNDS = [
@@ -788,50 +790,20 @@ export default function LandingPage() {
       {/* 10. DEMO VIDEO / WALKTHROUGH MODAL                                        */}
       {/* ========================================================================= */}
       {showVideoModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
-            <div className="p-4 bg-[#0a192f] text-white flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Play className="w-5 h-5 text-amber-400 fill-current" />
-                <h3 className="font-bold text-sm">System Walkthrough & Video Demonstration</h3>
-              </div>
-              <button 
-                onClick={() => setShowVideoModal(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-4 text-xs text-slate-700">
-              <div className="aspect-video bg-slate-900 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center p-6 text-white relative overflow-hidden group">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-400 mb-3 shadow-lg group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 fill-current ml-1" />
-                </div>
-                <h4 className="font-bold text-sm">Live System Walkthrough Available</h4>
-                <p className="text-slate-400 text-xs mt-1 max-w-sm">
-                  Experience the complete 3-pillar workflow: Login &rarr; Dashboard &rarr; Project Risk Priority &rarr; Investigation Desk.
-                </p>
-                <button
-                  onClick={() => {
-                    setShowVideoModal(false);
-                    navigate('/login');
-                  }}
-                  className="mt-4 px-5 py-2 bg-amber-400 text-slate-950 font-bold rounded-lg hover:bg-amber-300 transition-all cursor-pointer"
-                >
-                  Launch Interactive Demo
-                </button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono text-slate-500">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">01. Live GIS Map</div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">02. Square Bar Trends</div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">03. 7-Stage Desk</div>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+          <div className="relative max-w-5xl w-full flex flex-col items-center">
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="self-end mb-2 flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-xs font-semibold cursor-pointer shadow-md transition-colors"
+            >
+              <X className="w-4 h-4" />
+              <span>Close Video Player</span>
+            </button>
+            <LiveDemoVideoPlayer onClose={() => setShowVideoModal(false)} />
           </div>
         </div>
       )}
+
 
       {/* ========================================================================= */}
       {/* 11. INSTITUTIONAL GOVERNMENT FOOTER                                       */}
