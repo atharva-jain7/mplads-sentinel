@@ -19,50 +19,27 @@ export default function Sidebar() {
   const isDistrict = roleId === 'DISTRICT';
   const isState = roleId === 'STATE';
 
-  // Role-specific navigation items according to Section 10
+  // Role-specific navigation items: strictly Dashboard, Projects, Investigation Desk (and Data for tech roles)
   const getNavItems = () => {
     if (isMP) {
       return [
-        { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { to: '/projects', label: 'My Works', icon: FolderKanban },
-        { to: '/priority-cases', label: 'Priority Cases', icon: AlertTriangle, count: 12 },
-        { to: '/gis', label: 'GIS Surveillance', icon: Compass },
-        { to: '/investigation/MPL-10482', label: 'Investigations', icon: FileSearch },
-        { to: '/reports/MPL-10482', label: 'Reports', icon: FileText },
-      ];
-    }
-    if (isDistrict) {
-      return [
-        { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-        { to: '/priority-cases', label: 'Priority Cases', icon: AlertTriangle, count: 12 },
-        { to: '/projects', label: 'Project Registry', icon: FolderKanban },
-        { to: '/gis', label: 'GIS Surveillance', icon: Compass },
-        { to: '/investigation/MPL-10482', label: 'Investigations', icon: FileSearch },
-        { to: '/reports/MPL-10482', label: 'Reports', icon: FileText },
-        { to: '/data', label: 'Data & Models', icon: UploadCloud },
       ];
     }
     if (isState) {
       return [
-        { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-        { to: '/priority-cases', label: 'Priority Cases', icon: AlertTriangle, count: 12 },
-        { to: '/projects', label: 'Project Registry', icon: FolderKanban },
-        { to: '/gis', label: 'GIS Surveillance', icon: Compass },
-        { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-        { to: '/investigation/MPL-10482', label: 'Investigations', icon: FileSearch },
-        { to: '/reports/MPL-10482', label: 'Reports', icon: FileText },
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { to: '/projects', label: 'Projects', icon: FolderKanban },
+        { to: '/investigation-desk', label: 'Investigation Desk', icon: FileSearch },
       ];
     }
-    // Ministry (All-India)
+    // Ministry & District Authority
     return [
-      { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-      { to: '/priority-cases', label: 'Priority Cases', icon: AlertTriangle, count: 12 },
-      { to: '/projects', label: 'Project Registry', icon: FolderKanban },
-      { to: '/gis', label: 'GIS Surveillance', icon: Compass },
-      { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-      { to: '/investigation/MPL-10482', label: 'Investigations', icon: FileSearch },
-      { to: '/reports/MPL-10482', label: 'Reports', icon: FileText },
-      { to: '/data', label: 'Data & Models', icon: UploadCloud },
+      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/projects', label: 'Projects', icon: FolderKanban },
+      { to: '/investigation-desk', label: 'Investigation Desk', icon: FileSearch },
+      { to: '/data', label: 'Data / System Status', icon: UploadCloud },
     ];
   };
 

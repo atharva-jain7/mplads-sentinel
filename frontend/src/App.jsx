@@ -6,13 +6,10 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectListPage from './pages/ProjectListPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
-import InvestigationPage from './pages/InvestigationPage';
+import InvestigationDeskPage from './pages/InvestigationDeskPage';
 import ReportPage from './pages/ReportPage';
 import DataImportPage from './pages/DataImportPage';
 import LandingPage from './pages/LandingPage';
-import RankingsPage from './pages/RankingsPage';
-import GISPage from './pages/GISPage';
-import AnalyticsPage from './pages/AnalyticsPage';
 import { authService } from './services/auth';
 
 function ProtectedLayout({ children }) {
@@ -39,7 +36,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         
-        {/* 1. Executive Overview */}
+        {/* 1. Core Pillar: Executive Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -49,18 +46,7 @@ export default function App() {
           }
         />
 
-        {/* 2. Priority Investigation Queue */}
-        <Route
-          path="/priority-cases"
-          element={
-            <ProtectedLayout>
-              <RankingsPage />
-            </ProtectedLayout>
-          }
-        />
-        <Route path="/rankings" element={<Navigate to="/priority-cases" replace />} />
-
-        {/* 3. Project Registry */}
+        {/* 2. Core Pillar: Project Risk Priority */}
         <Route
           path="/projects"
           element={
@@ -78,46 +64,17 @@ export default function App() {
           }
         />
 
-        {/* 4. Dedicated GIS Surveillance */}
+        {/* 3. Core Pillar: Investigation Desk */}
         <Route
-          path="/gis"
+          path="/investigation-desk"
           element={
             <ProtectedLayout>
-              <GISPage />
+              <InvestigationDeskPage />
             </ProtectedLayout>
           }
         />
 
-        {/* 5. Dedicated Risk & Performance Analytics */}
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedLayout>
-              <AnalyticsPage />
-            </ProtectedLayout>
-          }
-        />
-
-        {/* 6. Investigation Workspace */}
-        <Route
-          path="/investigation/:projectId"
-          element={
-            <ProtectedLayout>
-              <InvestigationPage />
-            </ProtectedLayout>
-          }
-        />
-        <Route
-          path="/investigations/:projectId"
-          element={
-            <ProtectedLayout>
-              <InvestigationPage />
-            </ProtectedLayout>
-          }
-        />
-        <Route path="/investigations" element={<Navigate to="/investigation/MPL-10482" replace />} />
-
-        {/* 7. Review Reports & Dossiers */}
+        {/* 4. Statutory Dossiers & Review Reports */}
         <Route
           path="/reports/:reportId"
           element={
@@ -126,9 +83,9 @@ export default function App() {
             </ProtectedLayout>
           }
         />
-        <Route path="/reports" element={<Navigate to="/reports/MPL-10482" replace />} />
+        <Route path="/reports" element={<Navigate to="/projects" replace />} />
 
-        {/* 8. Data & Model Status */}
+        {/* 5. Data & Model Status */}
         <Route
           path="/data"
           element={
@@ -138,6 +95,34 @@ export default function App() {
           }
         />
         <Route path="/import" element={<Navigate to="/data" replace />} />
+
+        {/* Clean Redirects for Consolidated Features */}
+        {/* GIS & Analytics now live directly inside Dashboard */}
+        <Route path="/gis" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Priority Cases & Rankings consolidated into Project Risk Priority */}
+        <Route path="/priority-cases" element={<Navigate to="/projects" replace />} />
+        <Route path="/rankings" element={<Navigate to="/projects" replace />} />
+
+        {/* Investigation links route to the dedicated Investigation Desk */}
+        <Route path="/investigations" element={<Navigate to="/investigation-desk" replace />} />
+        <Route
+          path="/investigation/:projectId"
+          element={
+            <ProtectedLayout>
+              <InvestigationDeskPage />
+            </ProtectedLayout>
+          }
+        />
+        <Route
+          path="/investigations/:projectId"
+          element={
+            <ProtectedLayout>
+              <InvestigationDeskPage />
+            </ProtectedLayout>
+          }
+        />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

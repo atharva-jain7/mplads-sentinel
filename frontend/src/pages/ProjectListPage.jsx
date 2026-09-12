@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, FileText, Lock, ShieldAlert, UploadCloud, Globe, Building, Filter, ArrowLeft } from 'lucide-react';
+import { 
+  Search, 
+  ChevronLeft, 
+  ChevronRight, 
+  FileText, 
+  Lock, 
+  ShieldAlert, 
+  UploadCloud, 
+  Globe, 
+  Building, 
+  Filter, 
+  ArrowLeft,
+  FileSearch,
+  AlertTriangle,
+  CheckCircle2,
+  Send
+} from 'lucide-react';
 import { api } from '../services/api';
 import { authService } from '../services/auth';
 import RiskBadge from '../components/RiskBadge';
@@ -25,6 +41,64 @@ export default function ProjectListPage() {
   const [size] = useState(15);
   const [loading, setLoading] = useState(true);
   const [availableDistricts, setAvailableDistricts] = useState([]);
+
+  // Investigation desk state
+  const [enrolledCases, setEnrolledCases] = useState(() => {
+    try {
+      const saved = localStorage.getItem('investigation_desk_cases');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [selectedProjectForDesk, setSelectedProjectForDesk] = useState(null);
+  const [deskReason, setDeskReason] = useState('');
+  const [deskToast, setDeskToast] = useState('');
+
+  const isEnrolledInDesk = (pid) => enrolledCases.some(c => c.projectId === pid);
+
+  const handleSendToDesk = () => {
+    if (!selectedProjectForDesk) return;
+    try {
+      const current = JSON.parse(localStorage.getItem('investigation_desk_cases') || '[]');
+      const newCase = {
+        projectId: selectedProjectForDesk.projectId,
+        projectName: selectedProjectForDesk.projectName,
+        sector: selectedProjectForDesk.projectType || 'Infrastructure',
+        district: selectedProjectForDesk.district || 'Pune',
+        state: selectedProjectForDesk.state || 'Maharashtra',
+        sanctionedAmount: selectedProjectForDesk.sanctionedAmount || 0,
+        expenditureAmount: selectedProjectForDesk.expenditureAmount || 0,
+        progressPercentage: selectedProjectForDesk.progressPercentage || 0,
+        expectedProgressPercentage: selectedProjectForDesk.expectedProgressPercentage || 100,
+        delayDays: selectedProjectForDesk.delayDays || 0,
+        status: selectedProjectForDesk.status || 'DELAYED',
+        riskLevel: selectedProjectForDesk.riskLevel || 'HIGH',
+        riskScore: selectedProjectForDesk.riskScore || 75,
+        stage: 'UNDER_REVIEW',
+        assignedOfficer: user.fullName || 'Rajesh Sharma, IAS (District Magistrate)',
+        enlistReason: deskReason.trim() || `Flagged for administrative scrutiny (Risk Score: ${selectedProjectForDesk.riskScore})`,
+        auditTrail: [
+          {
+            officer: user.fullName || 'District Monitoring Officer',
+            action: 'Case Enlisted to Investigation Desk',
+            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            comment: deskReason.trim() || 'Enlisted from Project Risk Priority for administrative inquiry and field inspection.',
+            stage: 'UNDER_REVIEW'
+          }
+        ]
+      };
+      const updated = [newCase, ...current.filter(c => c.projectId !== newCase.projectId)];
+      localStorage.setItem('investigation_desk_cases', JSON.stringify(updated));
+      setEnrolledCases(updated);
+      setDeskToast(`Work ${selectedProjectForDesk.projectId} successfully sent to Investigation Desk.`);
+      setSelectedProjectForDesk(null);
+      setDeskReason('');
+      setTimeout(() => setDeskToast(''), 4000);
+    } catch (e) {
+      console.warn('Failed to send to desk:', e);
+    }
+  };
 
   // Initialize from searchParams if navigated from Dashboard or elsewhere
   const initialDistrict = searchParams.get('district') || (isLockedDistrict ? lockedDistrictValue : '');
@@ -177,7 +251,9 @@ export default function ProjectListPage() {
           <span>Overview</span>
         </button>
         <span>/</span>
-        <span className="text-slate-800 font-semibold">Project Registry</span>
+        <span className="text-slate-800 font-semibold">
+          {isMP ? "Constituency Works Risk Priority" : "Project Risk Priority"}
+        </span>
       </div>
 
       {/* Header */}
@@ -185,22 +261,14 @@ export default function ProjectListPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              {isMP && "My Constituency Works Portfolio (Pune PC)"}
-              {isState && "Maharashtra State Project Registry (All State Works)"}
-              {isMinistry && "National Project Registry (All-India Surveillance)"}
+              {isMP ? "CONSTITUENCY WORKS RISK PRIORITY" : "PROJECT RISK PRIORITY"}
             </h1>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-300">
               {isMinistry ? 'PAN-INDIA ACCESS' : isState ? 'STATE-WIDE ACCESS' : 'CONSTITUENCY ONLY'}
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            {isMP ? (
-              <span>Showing works recommended within <b>{user.jurisdiction || 'Pune Parliamentary Constituency'}</b></span>
-            ) : isState ? (
-              <span>Monitoring all sanctioned works across Maharashtra state • {total.toLocaleString('en-IN')} records available</span>
-            ) : (
-              <span>Central oversight across 543 Parliamentary Constituencies • {total.toLocaleString('en-IN')} records registered</span>
-            )}
+            Projects ranked by current risk and monitoring priority • {total.toLocaleString('en-IN')} works registered
           </p>
         </div>
 
@@ -404,14 +472,40 @@ export default function ProjectListPage() {
                         >
                           Inspect
                         </button>
-                        <button
-                          onClick={() => navigate(`/reports/${p.projectId}`)}
-                          title="Generate Statutory Dossier"
-                          className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>Dossier</span>
-                        </button>
+                        {!isMP && (
+                          <>
+                            <button
+                              onClick={() => navigate(`/reports/${p.projectId}`)}
+                              title="Generate Statutory Dossier"
+                              className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <span>Dossier</span>
+                            </button>
+                            {isEnrolledInDesk(p.projectId) ? (
+                              <button
+                                onClick={() => navigate(`/investigation-desk?caseId=${p.projectId}`)}
+                                title="Enrolled in Investigation Desk"
+                                className="px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200 transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <FileSearch className="w-3 h-3 text-rose-600" />
+                                <span>In Desk</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setSelectedProjectForDesk(p);
+                                  setDeskReason(`Flagged for administrative inquiry due to risk score ${p.riskScore}.`);
+                                }}
+                                title="Send this flagged work to Investigation Desk"
+                                className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <Send className="w-3 h-3" />
+                                <span>Send to Desk</span>
+                              </button>
+                            )}
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -427,7 +521,7 @@ export default function ProjectListPage() {
             <button
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
-              className="p-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40"
+              className="p-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -435,13 +529,92 @@ export default function ProjectListPage() {
             <button
               disabled={projects.length < size}
               onClick={() => setPage(page + 1)}
-              className="p-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40"
+              className="p-1 bg-white border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </div>
+
+      {/* Send to Investigation Desk Modal */}
+      {selectedProjectForDesk && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl border border-slate-300 shadow-2xl max-w-lg w-full p-5 space-y-4 font-sans animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-rose-50 text-rose-600 rounded-lg">
+                  <FileSearch className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Send to Investigation Desk</h3>
+                  <p className="text-[11px] text-slate-500 font-mono">{selectedProjectForDesk.projectId}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedProjectForDesk(null)}
+                className="text-slate-400 hover:text-slate-600 text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-xs space-y-2">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <div className="font-semibold text-slate-900">{selectedProjectForDesk.projectName}</div>
+                <div className="text-slate-500 text-[11px]">{selectedProjectForDesk.district}, {selectedProjectForDesk.state} • {selectedProjectForDesk.projectType}</div>
+                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono">
+                  <span>Sanctioned: ₹{((selectedProjectForDesk.sanctionedAmount || 0) / 100000).toFixed(1)}L</span>
+                  <span className="text-rose-700">Risk Score: {selectedProjectForDesk.riskScore}/100</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Investigation Referral Directive / Rationale:
+                </label>
+                <textarea
+                  value={deskReason}
+                  onChange={(e) => setDeskReason(e.target.value)}
+                  placeholder="Specify anomaly indicators, suspected physical lag, or special instructions for investigating officer..."
+                  rows={3}
+                  className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-slate-900 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setSelectedProjectForDesk(null)}
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendToDesk}
+                className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Confirm & Enlist Case</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification */}
+      {deskToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-xs border border-slate-700 animate-in slide-in-from-bottom-5">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{deskToast}</span>
+          <button
+            onClick={() => navigate('/investigation-desk')}
+            className="ml-2 px-2 py-0.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded text-[11px] cursor-pointer"
+          >
+            Open Desk
+          </button>
+        </div>
+      )}
     </div>
   );
 }
