@@ -17,7 +17,6 @@ import {
   Landmark,
   Compass,
   Cpu,
-  Play,
   X,
   ExternalLink,
   Clock,
@@ -28,8 +27,6 @@ import {
   ChevronRight,
   BookOpen
 } from 'lucide-react';
-import LiveDemoVideoPlayer from '../components/LiveDemoVideoPlayer';
-
 
 // Background images for the rotating hero slideshow
 const HERO_BACKGROUNDS = [
@@ -74,7 +71,6 @@ export default function LandingPage() {
 
   // Modals state
   const [showDocModal, setShowDocModal] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Auto-rotate hero background images every 5.5 seconds
   useEffect(() => {
@@ -309,8 +305,8 @@ export default function LandingPage() {
             Explainable AI · Human-in-the-loop · Evidence-backed
           </div>
 
-          {/* Quick Action Circular Icon Buttons */}
-          <div className="flex items-center gap-8 pt-4">
+          {/* Quick Action Circular Icon Button */}
+          <div className="flex items-center justify-center pt-4">
             {/* Documentation Button */}
             <button
               onClick={() => setShowDocModal(true)}
@@ -320,20 +316,7 @@ export default function LandingPage() {
                 <FileText className="w-5 h-5" />
               </div>
               <span className="text-[11px] font-semibold text-slate-300 group-hover:text-white transition-colors">
-                Documentation
-              </span>
-            </button>
-
-            {/* Demo Video Button */}
-            <button
-              onClick={() => setShowVideoModal(true)}
-              className="flex flex-col items-center gap-1.5 group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-slate-900/80 border border-slate-600/80 flex items-center justify-center text-slate-200 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-400 shadow-md transition-all transform group-hover:scale-110">
-                <Play className="w-5 h-5 fill-current ml-0.5" />
-              </div>
-              <span className="text-[11px] font-semibold text-slate-300 group-hover:text-white transition-colors">
-                Demo Video
+                Documentation & Architecture
               </span>
             </button>
           </div>
@@ -786,27 +769,10 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 10. DEMO VIDEO / WALKTHROUGH MODAL                                        */}
-      {/* ========================================================================= */}
-      {showVideoModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-          <div className="relative max-w-5xl w-full flex flex-col items-center">
-            <button
-              onClick={() => setShowVideoModal(false)}
-              className="self-end mb-2 flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-xs font-semibold cursor-pointer shadow-md transition-colors"
-            >
-              <X className="w-4 h-4" />
-              <span>Close Video Player</span>
-            </button>
-            <LiveDemoVideoPlayer onClose={() => setShowVideoModal(false)} />
-          </div>
-        </div>
-      )}
-
 
       {/* ========================================================================= */}
-      {/* 11. INSTITUTIONAL GOVERNMENT FOOTER                                       */}
+      {/* 10. INSTITUTIONAL GOVERNMENT FOOTER                                       */}
+
       {/* ========================================================================= */}
       <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 py-8 px-4 sm:px-8 mt-12 font-sans">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
