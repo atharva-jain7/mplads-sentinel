@@ -12,6 +12,7 @@ import DataImportPage from './pages/DataImportPage';
 import LandingPage from './pages/LandingPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { authService } from './services/auth';
+import { AccessibilityProvider } from './context/AccessibilityContext';
 
 function ProtectedLayout({ children }) {
   if (!authService.isAuthenticated()) {
@@ -36,9 +37,10 @@ function ProtectedLayout({ children }) {
 export default function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-        <Route path="/login" element={<LoginPage />} />
+      <AccessibilityProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
         
         {/* 1. Core Pillar: Executive Dashboard */}
         <Route
@@ -132,6 +134,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+  </AccessibilityProvider>
   </ErrorBoundary>
 );
 }
